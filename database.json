@@ -1,0 +1,140 @@
+{
+  "auth": {
+    "username": "admin",
+    "password": "magik123",
+    "createdAt": 1788501017656
+  },
+  "leads": [
+    {
+      "id": "lead-101",
+      "customerName": "Aarav Sharma",
+      "mobile": "+91 98765 43210",
+      "enquiryText": "Enquired about 500 Gold Foil Business Cards on 400gsm matte card stock.",
+      "status": "New",
+      "createdAt": 1788483017656
+    },
+    {
+      "id": "lead-102",
+      "customerName": "Priya Sundaram",
+      "mobile": "+91 98400 11223",
+      "enquiryText": "Looking for a 12x4 ft Outdoor Flex Banner for new clinic opening on Friday.",
+      "status": "Contacted",
+      "createdAt": 1788436217656
+    },
+    {
+      "id": "lead-103",
+      "customerName": "Vikram Electronics",
+      "mobile": "+91 99112 88776",
+      "enquiryText": "Needs 50 Acrylic Custom Trophies for annual company awards.",
+      "status": "Converted",
+      "createdAt": 1788328217656
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord-1001",
+      "orderNumber": "ORD-1001",
+      "customerName": "Kaveri Bakery",
+      "mobile": "+91 97110 55443",
+      "itemType": "Flyer / Pamphlet",
+      "size": "A5 Trifold Gloss",
+      "quantity": 2000,
+      "price": 4500,
+      "workDetails": "Bakery inauguration flyer. Colors: Warm Amber & White. High gloss finish.",
+      "stage": "Quotation",
+      "isPaid": false,
+      "stageEnteredAt": 1788493817656,
+      "createdAt": 1788493817656
+    },
+    {
+      "id": "ord-1002",
+      "orderNumber": "ORD-1002",
+      "customerName": "Metro Fitness Studio",
+      "mobile": "+91 98888 12345",
+      "itemType": "Flex Banner",
+      "size": "10x4 ft Vinyl",
+      "quantity": 2,
+      "price": 3200,
+      "workDetails": "Bright yellow background. Bold text \"30% OFF SUMMER PASS\". Eyelets every 2 feet.",
+      "stage": "Design",
+      "isPaid": false,
+      "stageEnteredAt": 1788483017656,
+      "createdAt": 1788472217656
+    },
+    {
+      "id": "ord-1003",
+      "orderNumber": "ORD-1003",
+      "customerName": "Dr. Ramesh Kumar",
+      "mobile": "+91 94440 88990",
+      "itemType": "Business Cards",
+      "size": "3.5x2 in Standard",
+      "quantity": 500,
+      "price": 1800,
+      "workDetails": "Spot UV coating on doctor logo. Matte 350gsm cardstock.",
+      "stage": "Proof Sent",
+      "isPaid": false,
+      "stageEnteredAt": 1788457817656,
+      "createdAt": 1788414617656
+    },
+    {
+      "id": "ord-1004",
+      "orderNumber": "ORD-1004",
+      "customerName": "Apex Tech Solutions",
+      "mobile": "+91 96000 33445",
+      "itemType": "Acrylic Signage",
+      "size": "3x2 ft LED Backlit",
+      "quantity": 1,
+      "price": 12500,
+      "workDetails": "CRITICAL ALERT DEMO: Client approved design 26h ago! Printing hasn't started yet!",
+      "stage": "Approved",
+      "isPaid": false,
+      "stageEnteredAt": 1788407417656,
+      "createdAt": 1788393017656
+    },
+    {
+      "id": "ord-1005",
+      "orderNumber": "ORD-1005",
+      "customerName": "Greenwood International",
+      "mobile": "+91 95555 77112",
+      "itemType": "Trophy / Memento",
+      "size": "8 inch Crystal",
+      "quantity": 35,
+      "price": 24500,
+      "workDetails": "CRITICAL ALERT DEMO: Printing & Engraving completed 30h ago! Invoice not raised yet!",
+      "stage": "Printing & Cutting",
+      "isPaid": false,
+      "stageEnteredAt": 1788393017656,
+      "createdAt": 1788357017656
+    },
+    {
+      "id": "ord-1006",
+      "orderNumber": "ORD-1006",
+      "customerName": "Royal Auto Workshop",
+      "mobile": "+91 93333 44556",
+      "itemType": "Sticker / Label",
+      "size": "3x3 in Waterproof Vinyl",
+      "quantity": 1000,
+      "price": 3500,
+      "workDetails": "Oil change reminder stickers with metallic foil border.",
+      "stage": "Invoice",
+      "isPaid": false,
+      "stageEnteredAt": 1788486617656,
+      "createdAt": 1788375017656
+    },
+    {
+      "id": "ord-1007",
+      "orderNumber": "ORD-1007",
+      "customerName": "Sunrise Cafe",
+      "mobile": "+91 92222 11000",
+      "itemType": "ID Card",
+      "size": "PVC Standard",
+      "quantity": 12,
+      "price": 2400,
+      "workDetails": "Staff ID cards with lanyard printed on both sides.",
+      "stage": "Delivery",
+      "isPaid": true,
+      "stageEnteredAt": 1788497417656,
+      "createdAt": 1788328217656
+    }
+  ]
+}
