@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, User, Menu, X, Sparkles, Award } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, Sparkles, Award, Shield } from 'lucide-react';
 import { useCart } from '../lib/cartContext';
 import { useAuth } from '../lib/authContext';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
   const { totalItems, setIsCartOpen } = useCart();
-  const { user, setIsAuthModalOpen, setAuthMode } = useAuth();
+  const { user, setIsAuthModalOpen, setAuthMode, setTargetRole } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -85,12 +85,17 @@ export const Navbar: React.FC = () => {
             >
               Artisan Awards
             </Link>
-            <Link
-              href="/catalog?category=Desktop+Monuments"
-              className="text-sm font-medium text-charcoal-900 hover:text-forest-900 transition-colors py-1"
-            >
-              Desk Monuments
-            </Link>
+
+            {/* Admin Portal Nav Item for Admins */}
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1 text-xs font-bold bg-forest-900 text-accent-gold px-3 py-1.5 rounded-full border border-forest-700 shadow-2xs hover:bg-forest-950 transition-all"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin Portal</span>
+              </Link>
+            )}
           </nav>
 
           {/* Right Action Icons & Search */}
@@ -108,41 +113,63 @@ export const Navbar: React.FC = () => {
               <Search className="w-4 h-4 text-charcoal-900/60 absolute left-3 top-2.5" />
             </form>
 
-            {/* User Account / Auth Modal Trigger */}
+            {/* User Account / Auth Trigger */}
             {user ? (
-              <Link
-                href="/account"
-                className="flex items-center gap-2 p-1.5 rounded-full hover:bg-cream-200/70 transition-colors text-charcoal-900"
-                title="Account Dashboard"
-              >
-                {user.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full border border-forest-900/20 object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 flex items-center justify-center text-xs font-bold">
-                    {user.name.charAt(0)}
+              <div className="flex items-center gap-2">
+                <Link
+                  href={user.role === 'admin' ? '/admin' : '/account'}
+                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-cream-200/70 transition-colors text-charcoal-900"
+                  title={user.role === 'admin' ? 'Admin Dashboard' : 'Account Dashboard'}
+                >
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full border border-forest-900/20 object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 flex items-center justify-center text-xs font-bold">
+                      {user.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="hidden lg:flex flex-col text-left">
+                    <span className="text-xs font-semibold max-w-[100px] truncate leading-tight">
+                      {user.name}
+                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-forest-800">
+                      {user.role === 'admin' ? '⚙️ Admin' : 'Customer'}
+                    </span>
                   </div>
-                )}
-                <span className="hidden lg:inline text-xs font-semibold max-w-[100px] truncate">
-                  {user.name}
-                </span>
-              </Link>
+                </Link>
+              </div>
             ) : (
-              <button
-                onClick={() => {
-                  setAuthMode('login');
-                  setIsAuthModalOpen(true);
-                }}
-                className="p-2 text-charcoal-900 hover:text-forest-900 hover:bg-cream-200/70 rounded-full transition-colors flex items-center gap-1.5"
-                aria-label="Sign in"
-              >
-                <User className="w-5 h-5" />
-                <span className="hidden sm:inline text-xs font-semibold">Sign In</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setTargetRole('customer');
+                    setAuthMode('login');
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="p-2 text-charcoal-900 hover:text-forest-900 hover:bg-cream-200/70 rounded-full transition-colors flex items-center gap-1"
+                  aria-label="Sign in"
+                >
+                  <User className="w-5 h-5" />
+                  <span className="hidden sm:inline text-xs font-semibold">Sign In</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setTargetRole('admin');
+                    setAuthMode('login');
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold bg-forest-900 text-accent-gold px-3 py-1.5 rounded-full hover:bg-forest-950 transition-colors shadow-2xs"
+                >
+                  <Shield className="w-3 h-3" />
+                  <span>Admin</span>
+                </button>
+              </div>
             )}
 
             {/* Cart Slide-Over Trigger */}
@@ -188,27 +215,16 @@ export const Navbar: React.FC = () => {
             >
               All Product Catalog
             </Link>
-            <Link
-              href="/catalog?category=Sports+Keepsakes"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-900 hover:bg-cream-200"
-            >
-              Sports Keepsakes
-            </Link>
-            <Link
-              href="/catalog?category=Artisan+Awards"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-900 hover:bg-cream-200"
-            >
-              Artisan Awards
-            </Link>
-            <Link
-              href="/catalog?category=Desktop+Monuments"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-900 hover:bg-cream-200"
-            >
-              Desktop Monuments
-            </Link>
+
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-bold text-accent-gold bg-forest-900"
+              >
+                ⚙️ Admin Management Portal
+              </Link>
+            )}
           </div>
         )}
       </div>

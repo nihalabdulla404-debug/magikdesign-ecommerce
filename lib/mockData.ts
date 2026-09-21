@@ -8,6 +8,9 @@ export interface Product {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  stockQuantity: number;
+  sku: string;
+  supplier: string;
   isFeatured?: boolean;
   imageUrl: string;
   gallery: string[];
@@ -26,6 +29,26 @@ export interface Review {
   comment: string;
   date: string;
   verifiedBuyer: boolean;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  supplierName: string;
+  itemName: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  orderDate: string;
+  expectedDelivery: string;
+  status: 'Pending' | 'In Transit' | 'Received';
+}
+
+export interface SalesMetrics {
+  totalRevenue: number;
+  totalOrdersCount: number;
+  averageOrderValue: number;
+  itemsSold: number;
 }
 
 export const CATEGORIES = [
@@ -74,6 +97,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 4.9,
     reviewCount: 42,
     inStock: true,
+    stockQuantity: 18,
+    sku: 'MGD-SK-001',
+    supplier: 'Apex Acrylic & Optics Foundry',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -105,6 +131,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 4.8,
     reviewCount: 28,
     inStock: true,
+    stockQuantity: 4, // Low stock item
+    sku: 'MGD-AA-002',
+    supplier: 'Veritas Bronze Sculptures',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -134,6 +163,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 4.7,
     reviewCount: 35,
     inStock: true,
+    stockQuantity: 12,
+    sku: 'MGD-SK-003',
+    supplier: 'Carrara Stone & Leather Crafts',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -164,6 +196,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 5.0,
     reviewCount: 19,
     inStock: true,
+    stockQuantity: 8,
+    sku: 'MGD-AA-004',
+    supplier: 'K9 Crystal Optics Ltd.',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -193,6 +228,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 4.6,
     reviewCount: 14,
     inStock: true,
+    stockQuantity: 25,
+    sku: 'MGD-DM-005',
+    supplier: 'Magik Resin & Concrete Lab',
     isFeatured: false,
     imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -222,6 +260,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     rating: 4.9,
     reviewCount: 31,
     inStock: true,
+    stockQuantity: 10,
+    sku: 'MGD-CP-006',
+    supplier: 'Heritage Timber Mills',
     isFeatured: false,
     imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
     gallery: [
@@ -239,60 +280,45 @@ export const INITIAL_PRODUCTS: Product[] = [
       { name: 'Dark Walnut & Gold', hex: '#18181b' },
       { name: 'Earthy Green Accents', hex: '#1b382b' }
     ]
+  }
+];
+
+export const INITIAL_PURCHASE_ORDERS: PurchaseOrder[] = [
+  {
+    id: 'po-1',
+    poNumber: 'PO-2026-881',
+    supplierName: 'Apex Acrylic & Optics Foundry',
+    itemName: 'Championship Ring Vault Enclosures',
+    quantity: 50,
+    unitCost: 85.00,
+    totalCost: 4250.00,
+    orderDate: '2026-09-10',
+    expectedDelivery: '2026-09-28',
+    status: 'In Transit'
   },
   {
-    id: 'm7',
-    name: 'Custom Jersey Frame Keepsake Display',
-    slug: 'custom-jersey-frame-display',
-    category: 'Sports Keepsakes',
-    price: 240.00,
-    rating: 4.9,
-    reviewCount: 56,
-    inStock: true,
-    isFeatured: false,
-    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'Shadowbox wall frame designed specifically to preserve autographed sports jerseys. Acid-free matting, pinless jersey hanger, and brass inscription plaque included.',
-    features: [
-      'Pinless Hanger System (No Fabric Damage)',
-      '99% UV Resistant Museum Glass',
-      'Deep Shadowbox Profile (2.5")',
-      'Dual Matboard with Custom Accent Trim'
-    ],
-    sizes: ['Youth Jersey (24x30")', 'Pro Adult Jersey (32x40")'],
-    colors: [
-      { name: 'Forest Matting / Black Frame', hex: '#1b382b' },
-      { name: 'Cream Matting / Gold Frame', hex: '#fcfaf7' }
-    ]
+    id: 'po-2',
+    poNumber: 'PO-2026-882',
+    supplierName: 'Veritas Bronze Sculptures',
+    itemName: 'AeroLine Bronze Castings',
+    quantity: 25,
+    unitCost: 60.00,
+    totalCost: 1500.00,
+    orderDate: '2026-09-15',
+    expectedDelivery: '2026-10-02',
+    status: 'Pending'
   },
   {
-    id: 'm8',
-    name: 'Vanguard Golf Hole-in-One Plaque',
-    slug: 'vanguard-golf-hole-in-one-plaque',
-    category: 'Custom Plaques',
-    price: 115.00,
-    rating: 4.8,
-    reviewCount: 22,
-    inStock: true,
-    isFeatured: false,
-    imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'Commemorate the ultimate golfing milestone. Features a recessed sphere mount for your actual golf ball alongside laser-etched scorecard and club specs.',
-    features: [
-      'Precision Recessed Ball Holder',
-      'Laser Etched Course & Scorecard Data',
-      'Solid Teak Wood Plaque Body',
-      'Desktop Stand or Wall Hanger'
-    ],
-    sizes: ['Compact Desk (6x8")', 'Wall Gallery (9x12")'],
-    colors: [
-      { name: 'Natural Teak Wood', hex: '#c87d53' },
-      { name: 'Dark Forest Finish', hex: '#1b382b' }
-    ]
+    id: 'po-3',
+    poNumber: 'PO-2026-879',
+    supplierName: 'Heritage Timber Mills',
+    itemName: 'Walnut Wood Plaque Slabs',
+    quantity: 100,
+    unitCost: 45.00,
+    totalCost: 4500.00,
+    orderDate: '2026-08-25',
+    expectedDelivery: '2026-09-05',
+    status: 'Received'
   }
 ];
 
@@ -317,17 +343,12 @@ export const MOCK_REVIEWS: Record<string, Review[]> = {
       date: '1 month ago',
       verifiedBuyer: true
     }
-  ],
-  'm2': [
-    {
-      id: 'r3',
-      productId: 'm2',
-      userName: 'David Sterling',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-      rating: 5,
-      comment: 'We awarded these at our national marathon gala. Everyone was stunned by how sleek and weight-balanced the bronze sculpture feels. 10/10 MagikDesign!',
-      date: '3 weeks ago',
-      verifiedBuyer: true
-    }
   ]
+};
+
+export const INITIAL_SALES_METRICS: SalesMetrics = {
+  totalRevenue: 24850.00,
+  totalOrdersCount: 84,
+  averageOrderValue: 295.83,
+  itemsSold: 112
 };
