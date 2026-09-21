@@ -20,11 +20,9 @@ import {
   DollarSign,
   ShoppingBag,
   Truck,
-  CheckCircle2,
   AlertTriangle,
   X,
   Search,
-  RefreshCw,
   Sparkles,
 } from 'lucide-react';
 
@@ -52,53 +50,53 @@ export default function AdminPage() {
   // Product Form State
   const [productForm, setProductForm] = useState({
     name: '',
-    category: 'Sports Keepsakes' as Product['category'],
-    price: 150.0,
-    originalPrice: 180.0,
-    stockQuantity: 20,
-    sku: 'MGD-NEW-001',
-    supplier: 'Apex Acrylic Foundry',
-    imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
-    description: 'Precision artisan keepsake engineered for victory milestones.',
-    features: ['Museum UV-Resistant Coating', 'Solid Brass Inscription Ribbon'],
-    sizes: ['Standard Edition (8")', 'Executive Edition (12")'],
-    colors: [{ name: 'Forest Obsidian', hex: '#1b382b' }, { name: 'Champagne Gold', hex: '#d4af37' }],
+    category: 'Custom Sports Jerseys' as Product['category'],
+    price: 499.0,
+    originalPrice: 650.0,
+    stockQuantity: 50,
+    sku: 'MD-SJ-010',
+    supplier: 'Magik Design Mulleria Studio',
+    imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1000&q=80',
+    description: 'Custom full-sublimation athletic jerseys for football and cricket clubs in Kasaragod.',
+    features: ['Dry-Fit Polyester Mesh', 'Full Color Sublimation', 'Custom Player Name & Number'],
+    sizes: ['Small (S)', 'Medium (M)', 'Large (L)', 'XL'],
+    colors: [{ name: 'Emerald Forest & Gold', hex: '#1b382b' }],
   });
 
   // Purchase Order Form State
   const [poForm, setPoForm] = useState({
-    supplierName: 'Veritas Bronze Sculptures',
-    itemName: 'AeroLine Bronze Castings',
-    quantity: 30,
-    unitCost: 55.0,
+    supplierName: 'Kasaragod Textile Mills',
+    itemName: 'Dry-Fit Polyester Jersey Fabric Rolls',
+    quantity: 100,
+    unitCost: 180.0,
   });
 
   // Orders Table State
   const [recentOrders, setRecentOrders] = useState([
     {
       id: 'MGD-984210',
-      customer: 'Marcus Vance',
-      email: 'm.vance@metroathletics.org',
-      items: 'Championship Ring Vault',
-      total: 189.0,
+      customer: 'Faisal Mulleria',
+      email: 'faisal.mulleria@gmail.com',
+      items: 'Custom Team Sports Jerseys (x18)',
+      total: 8982.0,
       status: 'Processing',
       date: '2026-09-21',
     },
     {
       id: 'MGD-984209',
-      customer: 'David Sterling',
-      email: 'd.sterling@marathon.org',
-      items: 'AeroLine Runner Trophy (x3)',
-      total: 435.0,
+      customer: 'Suresh Kumar Badiadka',
+      email: 'suresh.badiadka@gmail.com',
+      items: 'HD Weatherproof Flex Banner (10x4 ft)',
+      total: 720.0,
       status: 'In Laser Studio',
       date: '2026-09-20',
     },
     {
       id: 'MGD-984208',
-      customer: 'Elena Rostova',
-      email: 'elena@rostovaart.com',
-      items: 'Pinnacle Geometric Prism',
-      total: 210.0,
+      customer: 'Kasargod Corporate School',
+      email: 'info@kasaragodschool.edu',
+      items: 'PVC School ID Card Pack (x50)',
+      total: 1995.0,
       status: 'Delivered',
       date: '2026-09-18',
     },
@@ -169,8 +167,8 @@ export default function AdminPage() {
         reviewCount: 1,
         inStock: Number(productForm.stockQuantity) > 0,
         stockQuantity: Number(productForm.stockQuantity),
-        sku: productForm.sku || 'MGD-SK-' + Math.floor(100 + Math.random() * 900),
-        supplier: productForm.supplier || 'Magik Artisan Studio',
+        sku: productForm.sku || 'MD-SK-' + Math.floor(100 + Math.random() * 900),
+        supplier: productForm.supplier || 'Magik Design Mulleria Studio',
         isFeatured: true,
         imageUrl: productForm.imageUrl,
         gallery: [productForm.imageUrl],
@@ -218,17 +216,17 @@ export default function AdminPage() {
     setEditingProduct(null);
     setProductForm({
       name: '',
-      category: 'Sports Keepsakes',
-      price: 149.0,
-      originalPrice: 175.0,
-      stockQuantity: 15,
-      sku: 'MGD-SK-' + Math.floor(100 + Math.random() * 900),
-      supplier: 'Magik Artisan Studio',
-      imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
-      description: 'Precision handcrafted memento designed for champions.',
-      features: ['Museum Grade Acrylic', 'Laser Etched Inscription'],
-      sizes: ['Standard Edition'],
-      colors: [{ name: 'Forest Obsidian', hex: '#1b382b' }],
+      category: 'Custom Sports Jerseys',
+      price: 499.0,
+      originalPrice: 650.0,
+      stockQuantity: 30,
+      sku: 'MD-SJ-' + Math.floor(100 + Math.random() * 900),
+      supplier: 'Magik Design Mulleria Studio',
+      imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1000&q=80',
+      description: 'Custom sublimated sports jerseys for team tournaments.',
+      features: ['100% Dry-Fit Fabric', 'Custom Name & Number'],
+      sizes: ['Medium (M)', 'Large (L)'],
+      colors: [{ name: 'Emerald Forest', hex: '#1b382b' }],
     });
     setIsProductModalOpen(true);
   };
@@ -255,7 +253,7 @@ export default function AdminPage() {
     e.preventDefault();
     const newPo: PurchaseOrder = {
       id: 'po_' + Date.now(),
-      poNumber: 'PO-2026-' + Math.floor(885 + Math.random() * 100),
+      poNumber: 'PO-MGD-' + Math.floor(885 + Math.random() * 100),
       supplierName: poForm.supplierName,
       itemName: poForm.itemName,
       quantity: Number(poForm.quantity),
@@ -372,13 +370,13 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white p-6 rounded-3xl border border-cream-300 shadow-luxury space-y-2">
               <div className="flex items-center justify-between text-charcoal-800/60">
-                <span className="text-xs font-bold uppercase tracking-wider">Total Revenue</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Total Sales Revenue</span>
                 <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
                   <DollarSign className="w-4 h-4" />
                 </div>
               </div>
               <div className="font-serif text-3xl font-bold text-forest-900">
-                ${salesMetrics.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                ₹{salesMetrics.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </div>
               <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> +18.4% vs last month
@@ -406,9 +404,9 @@ export default function AdminPage() {
                 </div>
               </div>
               <div className="font-serif text-3xl font-bold text-charcoal-900">
-                ${salesMetrics.averageOrderValue.toFixed(2)}
+                ₹{salesMetrics.averageOrderValue.toFixed(2)}
               </div>
-              <span className="text-[10px] text-charcoal-800/60">High-ticket collector cart size</span>
+              <span className="text-[10px] text-charcoal-800/60">Team jersey & flex banner order size</span>
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-cream-300 shadow-luxury space-y-2">
@@ -421,7 +419,7 @@ export default function AdminPage() {
               <div className="font-serif text-3xl font-bold text-charcoal-900">
                 {salesMetrics.itemsSold} units
               </div>
-              <span className="text-[10px] text-charcoal-800/60">Crafted & Shipped</span>
+              <span className="text-[10px] text-charcoal-800/60">Printed & Delivered</span>
             </div>
           </div>
 
@@ -450,7 +448,7 @@ export default function AdminPage() {
                         <span className="text-[10px] text-charcoal-800/60">{ord.email}</span>
                       </td>
                       <td className="py-3.5 px-4 font-medium">{ord.items}</td>
-                      <td className="py-3.5 px-4 font-bold text-forest-900">${ord.total.toFixed(2)}</td>
+                      <td className="py-3.5 px-4 font-bold text-forest-900">₹{ord.total.toFixed(2)}</td>
                       <td className="py-3.5 px-4">
                         <select
                           value={ord.status}
@@ -505,10 +503,10 @@ export default function AdminPage() {
                 className="px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 font-medium"
               >
                 <option value="All">All Categories</option>
-                <option value="Sports Keepsakes">Sports Keepsakes</option>
-                <option value="Artisan Awards">Artisan Awards</option>
-                <option value="Desktop Monuments">Desktop Monuments</option>
-                <option value="Custom Plaques">Custom Plaques</option>
+                <option value="Custom Sports Jerseys">Custom Sports Jerseys</option>
+                <option value="Flex & Vinyl Signage">Flex & Vinyl Signage</option>
+                <option value="Corporate ID Cards & Printing">Corporate ID Cards & Printing</option>
+                <option value="Branding & Logo Design">Branding & Logo Design</option>
               </select>
             </div>
 
@@ -550,7 +548,7 @@ export default function AdminPage() {
                       </td>
                       <td className="py-3.5 px-4 font-mono font-semibold text-charcoal-800">{prod.sku}</td>
                       <td className="py-3.5 px-4 font-medium text-forest-900">{prod.category}</td>
-                      <td className="py-3.5 px-4 font-bold text-charcoal-900">${prod.price.toFixed(2)}</td>
+                      <td className="py-3.5 px-4 font-bold text-charcoal-900">₹{prod.price.toFixed(2)}</td>
                       <td className="py-3.5 px-4">
                         <span className={`inline-flex items-center gap-1 font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
                           prod.stockQuantity <= 5
@@ -655,7 +653,7 @@ export default function AdminPage() {
           <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-cream-300 shadow-2xs">
             <div>
               <h3 className="font-serif text-lg font-bold text-charcoal-900">Vendor Purchase Orders</h3>
-              <p className="text-xs text-charcoal-800/70">Orders placed with external bronze foundries, timber mills, and glass artisans.</p>
+              <p className="text-xs text-charcoal-800/70">Orders placed with textile suppliers, ink distributors, and card press suppliers.</p>
             </div>
 
             <button
@@ -688,7 +686,7 @@ export default function AdminPage() {
                       <td className="py-3.5 px-4 font-semibold text-charcoal-900">{po.supplierName}</td>
                       <td className="py-3.5 px-4 font-medium">{po.itemName}</td>
                       <td className="py-3.5 px-4 font-bold">{po.quantity} pcs</td>
-                      <td className="py-3.5 px-4 font-bold text-forest-900">${po.totalCost.toFixed(2)}</td>
+                      <td className="py-3.5 px-4 font-bold text-forest-900">₹{po.totalCost.toFixed(2)}</td>
                       <td className="py-3.5 px-4 text-charcoal-800/70">{po.orderDate}</td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
@@ -710,9 +708,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ========================================================= */}
       {/* PRODUCT CRUD MODAL (ADD / EDIT) */}
-      {/* ========================================================= */}
       {isProductModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-charcoal-950/70 backdrop-blur-xs" onClick={() => setIsProductModalOpen(false)} />
@@ -726,7 +722,7 @@ export default function AdminPage() {
             </button>
 
             <h3 className="font-serif text-2xl font-bold text-charcoal-900 mb-4">
-              {editingProduct ? 'Edit Product Details' : 'Add New Designer Keepsake'}
+              {editingProduct ? 'Edit Product Details' : 'Add New Service / Product'}
             </h3>
 
             <form onSubmit={handleSaveProduct} className="space-y-4">
@@ -748,17 +744,17 @@ export default function AdminPage() {
                     onChange={(e) => setProductForm({ ...productForm, category: e.target.value as Product['category'] })}
                     className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl"
                   >
-                    <option value="Sports Keepsakes">Sports Keepsakes</option>
-                    <option value="Artisan Awards">Artisan Awards</option>
-                    <option value="Desktop Monuments">Desktop Monuments</option>
-                    <option value="Custom Plaques">Custom Plaques</option>
+                    <option value="Custom Sports Jerseys">Custom Sports Jerseys</option>
+                    <option value="Flex & Vinyl Signage">Flex & Vinyl Signage</option>
+                    <option value="Corporate ID Cards & Printing">Corporate ID Cards & Printing</option>
+                    <option value="Branding & Logo Design">Branding & Logo Design</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Price ($)</label>
+                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -769,7 +765,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Original Price ($)</label>
+                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Original Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -802,7 +798,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Supplier / Foundry</label>
+                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Supplier / Studio</label>
                   <input
                     type="text"
                     required
@@ -846,9 +842,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ========================================================= */}
       {/* PURCHASE ORDER MODAL */}
-      {/* ========================================================= */}
       {isPoModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-charcoal-950/70 backdrop-blur-xs" onClick={() => setIsPoModalOpen(false)} />
@@ -900,7 +894,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Unit Cost ($)</label>
+                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Unit Cost (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -914,7 +908,7 @@ export default function AdminPage() {
 
               <div className="p-3 bg-cream-100 rounded-xl text-xs flex justify-between font-bold text-charcoal-900">
                 <span>Calculated Order Total:</span>
-                <span className="text-forest-900">${(poForm.quantity * poForm.unitCost).toFixed(2)}</span>
+                <span className="text-forest-900">₹{(poForm.quantity * poForm.unitCost).toFixed(2)}</span>
               </div>
 
               <button

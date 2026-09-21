@@ -2,7 +2,7 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
-  category: 'Sports Keepsakes' | 'Artisan Awards' | 'Desktop Monuments' | 'Custom Plaques';
+  category: 'Custom Sports Jerseys' | 'Flex & Vinyl Signage' | 'Corporate ID Cards & Printing' | 'Branding & Logo Design';
   price: number;
   originalPrice?: number;
   rating: number;
@@ -54,231 +54,221 @@ export interface SalesMetrics {
 export const CATEGORIES = [
   {
     id: '1',
-    name: 'Sports Keepsakes',
-    slug: 'sports-keepsakes',
-    description: 'Engineered mementos celebrating legendary athletic achievements & game memories.',
-    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80',
-    itemCount: 12
+    name: 'Custom Sports Jerseys',
+    slug: 'sports-jerseys',
+    description: 'Custom team athletic jerseys, sports day posters, and customized athletic tournament gear.',
+    imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
+    itemCount: 14
   },
   {
     id: '2',
-    name: 'Artisan Awards',
-    slug: 'artisan-awards',
-    description: 'Sculptural bronze, gold leaf, and crystal trophies for corporate and sport victories.',
-    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-    itemCount: 16
+    name: 'Flex & Vinyl Signage',
+    slug: 'flex-vinyl-signage',
+    description: 'Weather-resistant flex banners, vinyl posters, shop outdoor boards, and cloth banners.',
+    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a3121699495?auto=format&fit=crop&w=800&q=80',
+    itemCount: 18
   },
   {
     id: '3',
-    name: 'Desktop Monuments',
-    slug: 'desktop-monuments',
-    description: 'Architectural desk sculptures, resin memorabilia, and precision brass blocks.',
-    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    itemCount: 9
+    name: 'Corporate ID Cards & Printing',
+    slug: 'corporate-id-printing',
+    description: 'Custom employee & school ID cards, business cards, stickers, labels & legal certificates.',
+    imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=800&q=80',
+    itemCount: 22
   },
   {
     id: '4',
-    name: 'Custom Plaques',
-    slug: 'custom-plaques',
-    description: 'Hand-carved hardwood, frosted glass, and laser-engraved steel wall plaques.',
-    imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=800&q=80',
-    itemCount: 8
+    name: 'Branding & Logo Design',
+    slug: 'branding-logo-design',
+    description: 'Creative brand identity creation, custom business logo design from scratch & vector files.',
+    imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=800&q=80',
+    itemCount: 10
   }
 ];
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
-    id: 'm1',
-    name: 'Championship Ring Vault & Acrylic Case',
-    slug: 'championship-ring-vault',
-    category: 'Sports Keepsakes',
-    price: 189.00,
-    originalPrice: 220.00,
+    id: 'p1',
+    name: 'Sublimated Team Sports Jersey Set',
+    slug: 'sublimated-team-sports-jersey',
+    category: 'Custom Sports Jerseys',
+    price: 499.00,
+    originalPrice: 650.00,
     rating: 4.9,
+    reviewCount: 56,
+    inStock: true,
+    stockQuantity: 45,
+    sku: 'MD-SJ-001',
+    supplier: 'Magik Design Mulleria Studio',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1000&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=1000&q=80'
+    ],
+    description: 'Custom full-sublimation athletic jerseys for football, cricket, and sports clubs in Kasaragod. Features moisture-wicking dry-fit fabric, custom player names, and team sponsor logos.',
+    features: [
+      '100% Breathable Dry-Fit Polyester Mesh',
+      'Full Color High-Definition Sublimation Print',
+      'Custom Player Name & Numbering Included',
+      'Fade-Proof & Washable Premium Ink'
+    ],
+    sizes: ['Small (S)', 'Medium (M)', 'Large (L)', 'XL', 'XXL'],
+    colors: [
+      { name: 'Emerald Forest & Gold', hex: '#1b382b' },
+      { name: 'Royal Blue & White', hex: '#1e40af' },
+      { name: 'Crimson Red & Black', hex: '#991b1b' }
+    ]
+  },
+  {
+    id: 'p2',
+    name: 'High-Definition Weatherproof Flex Banner (Per Sq. Ft)',
+    slug: 'hd-weatherproof-flex-banner',
+    category: 'Flex & Vinyl Signage',
+    price: 18.00,
+    originalPrice: 22.00,
+    rating: 4.8,
     reviewCount: 42,
     inStock: true,
-    stockQuantity: 18,
-    sku: 'MGD-SK-001',
-    supplier: 'Apex Acrylic & Optics Foundry',
+    stockQuantity: 500,
+    sku: 'MD-FX-002',
+    supplier: 'Magik Large Format Printing',
     isFeatured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a3121699495?auto=format&fit=crop&w=1000&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1611591475168-7c87c067759b?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1000&q=80'
+      'https://images.unsplash.com/photo-1542744094-3a3121699495?auto=format&fit=crop&w=1000&q=80'
     ],
-    description: 'The premier display vault designed specifically for championship rings and sports memorabilia. Engineered with museum-grade UV protection acrylic, weighted anodized aluminum base, and custom LED spotlight illumination.',
+    description: 'Heavy-duty star flex & vinyl banners for shop boards, election campaigns, local festivals, and sports events. Printed with UV-resistant Japanese solvent inks.',
     features: [
-      'Museum-Grade 99.7% UV Blocking Acrylic Box',
-      'Precision Anodized Aircraft Aluminum Base',
-      'Rechargeable Micro-LED Illumination Base',
-      'Includes Engraved Brass Personalization Plate'
+      'Heavy-Duty 340 GSM Star Flex Material',
+      'Sunlight & Rain Resistant Solvent Printing',
+      'Reinforced Metal Eyelets Every 2 Feet',
+      'Same-Day Production Turnaround in Mulleria'
     ],
-    sizes: ['Single Ring (Compact)', 'Triple Ring Edition', 'Grand Franchise 6-Ring Case'],
+    sizes: ['Custom Dimensions (Per Sq. Ft)', 'Standard 6x3 Feet', 'Banner 10x4 Feet', 'Shop Board 12x5 Feet'],
     colors: [
-      { name: 'Forest Obsidian', hex: '#1b382b' },
-      { name: 'Brushed Charcoal', hex: '#27272a' },
-      { name: 'Champagne Gold', hex: '#d4af37' }
+      { name: 'Vibrant Full Color CMYK', hex: '#d4af37' }
     ]
   },
   {
-    id: 'm2',
-    name: 'AeroLine Minimalist Runner Trophy',
-    slug: 'aeroline-runner-trophy',
-    category: 'Artisan Awards',
-    price: 145.00,
-    originalPrice: 165.00,
-    rating: 4.8,
-    reviewCount: 28,
-    inStock: true,
-    stockQuantity: 4, // Low stock item
-    sku: 'MGD-AA-002',
-    supplier: 'Veritas Bronze Sculptures',
-    isFeatured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'A fluid, aerodynamic bronze sculpture capturing the grace and motion of athletic velocity. Cast using lost-wax precision method and hand-finished with a dark forest patina.',
-    features: [
-      'Solid Cast Bronze Silhouette',
-      'Solid Black Walnut Wood Base',
-      'Hand-Buffed Natural Oil Polish',
-      'Laser-Etched Custom Name & Event Date'
-    ],
-    sizes: ['Standard (8.5")', 'Executive (12")', 'Monumental (16")'],
-    colors: [
-      { name: 'Forest Bronze Patina', hex: '#325447' },
-      { name: 'Classic Antique Gold', hex: '#c87d53' },
-      { name: 'Matte Onyx', hex: '#18181b' }
-    ]
-  },
-  {
-    id: 'm3',
-    name: 'Precision Game-Ball Display Pedestal',
-    slug: 'game-ball-display-pedestal',
-    category: 'Sports Keepsakes',
-    price: 129.00,
-    rating: 4.7,
-    reviewCount: 35,
-    inStock: true,
-    stockQuantity: 12,
-    sku: 'MGD-SK-003',
-    supplier: 'Carrara Stone & Leather Crafts',
-    isFeatured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1519766304817-4f37bda74a29?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'Showcase your winning basketball, football, or soccer ball in mid-air elegance. Designed with magnetic levitation resonance stability and Italian leather padded ring.',
-    features: [
-      'Italian Grain Leather Resting Ring',
-      'Weighted Italian Marble Block Base',
-      'Anti-Slip Silicone Footpads',
-      'Custom Stainless Steel Inscription Ribbon'
-    ],
-    sizes: ['Basketball / Soccer', 'Football / Rugby', 'Baseball / Tennis'],
-    colors: [
-      { name: 'Carrara White & Gold', hex: '#e8dfd1' },
-      { name: 'Forest Green Marble', hex: '#1b382b' },
-      { name: 'Midnight Charcoal', hex: '#18181b' }
-    ]
-  },
-  {
-    id: 'm4',
-    name: 'The Pinnacle Geometric Achievement Prism',
-    slug: 'pinnacle-achievement-prism',
-    category: 'Artisan Awards',
-    price: 210.00,
-    originalPrice: 240.00,
+    id: 'p3',
+    name: 'Custom Corporate & School PVC ID Card Pack (10 Cards)',
+    slug: 'pvc-id-card-pack',
+    category: 'Corporate ID Cards & Printing',
+    price: 399.00,
+    originalPrice: 499.00,
     rating: 5.0,
+    reviewCount: 38,
+    inStock: true,
+    stockQuantity: 120,
+    sku: 'MD-ID-003',
+    supplier: 'Magik Plastic Card Press',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1000&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1000&q=80'
+    ],
+    description: 'Professional grade PVC plastic ID cards for schools, corporate firms, event staff, and security teams. Waterproof, scratch-resistant gloss laminate finish.',
+    features: [
+      'Standard Credit-Card Thickness PVC Plastic',
+      'Dual-Sided High Definition Color Printing',
+      'Includes Custom Lanyard Strap & Holder Clip',
+      'QR Code / Barcode / Staff ID Integration'
+    ],
+    sizes: ['Standard CR80 ID Size (85.6 x 54 mm)'],
+    colors: [
+      { name: 'Gloss Finish Laminate', hex: '#1b382b' },
+      { name: 'Matte Executive Finish', hex: '#18181b' }
+    ]
+  },
+  {
+    id: 'p4',
+    name: 'Custom Brand Logo & Identity Package',
+    slug: 'custom-brand-logo-package',
+    category: 'Branding & Logo Design',
+    price: 1499.00,
+    originalPrice: 1999.00,
+    rating: 5.0,
+    reviewCount: 29,
+    inStock: true,
+    stockQuantity: 99,
+    sku: 'MD-LD-004',
+    supplier: 'Magik Creative Design Studio',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1000&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1000&q=80'
+    ],
+    description: 'Complete business branding from scratch for shops, startups, and institutions in Kerala. Includes 3 unique logo concepts, vector master files, business card layout, and social media kit.',
+    features: [
+      '3 Custom Initial Logo Design Concepts',
+      'Vector AI, EPS, PDF, PNG High-Res Master Files',
+      'Complimentary Business Card Design File',
+      'Unlimited Minor Revisions Until Approval'
+    ],
+    sizes: ['Standard Logo Package', 'Complete Corporate Identity Suite'],
+    colors: [
+      { name: 'Full Vector Palette', hex: '#d4af37' }
+    ]
+  },
+  {
+    id: 'p5',
+    name: 'Premium Velvet Business Cards (Box of 100)',
+    slug: 'premium-velvet-business-cards',
+    category: 'Corporate ID Cards & Printing',
+    price: 299.00,
+    rating: 4.7,
+    reviewCount: 22,
+    inStock: true,
+    stockQuantity: 80,
+    sku: 'MD-BC-005',
+    supplier: 'Magik Fine Paper Press',
+    isFeatured: false,
+    imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1000&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1000&q=80'
+    ],
+    description: '350 GSM heavy cardstock business cards with soft-touch velvet lamination and optional spot UV or gold foil logo accents.',
+    features: [
+      '350 GSM Premium Cardstock Body',
+      'Soft Touch Velvet Lamination Coating',
+      'Precision Die-Cut Rounded Corners',
+      'Vibrant HD Color Accuracy'
+    ],
+    sizes: ['3.5" x 2" Standard', 'Square 2.5" x 2.5" Modern'],
+    colors: [
+      { name: 'Deep Forest Velvet', hex: '#1b382b' },
+      { name: 'Matte Charcoal Black', hex: '#18181b' }
+    ]
+  },
+  {
+    id: 'p6',
+    name: 'Outdoor Shop Banner & Metal Standee Signboard',
+    slug: 'outdoor-shop-banner-standee',
+    category: 'Flex & Vinyl Signage',
+    price: 1250.00,
+    originalPrice: 1499.00,
+    rating: 4.8,
     reviewCount: 19,
     inStock: true,
-    stockQuantity: 8,
-    sku: 'MGD-AA-004',
-    supplier: 'K9 Crystal Optics Ltd.',
-    isFeatured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'An architectural crystal masterpiece. Cut with diamond edge precision to refract light into brilliant spectral hues, mounted on a solid smoked oak base.',
-    features: [
-      'Optic K9 Crystal Block',
-      'Diamond-Facet Angle Cuts',
-      'Sub-surface 3D Laser Engraving Available',
-      'Luxury Velvet Collector Presentation Box'
-    ],
-    sizes: ['Medium Prism (7")', 'Large Prism (10")', 'Grand Prism (14")'],
-    colors: [
-      { name: 'Crystal Emerald Tint', hex: '#508571' },
-      { name: 'Pure Diamond Clear', hex: '#fdfbf7' },
-      { name: 'Smoked Amber Crystal', hex: '#c87d53' }
-    ]
-  },
-  {
-    id: 'm5',
-    name: 'Monolith Architectural Desk Sculpture',
-    slug: 'monolith-architectural-desk-sculpture',
-    category: 'Desktop Monuments',
-    price: 98.00,
-    rating: 4.6,
-    reviewCount: 14,
-    inStock: true,
-    stockQuantity: 25,
-    sku: 'MGD-DM-005',
-    supplier: 'Magik Resin & Concrete Lab',
+    stockQuantity: 15,
+    sku: 'MD-SB-006',
+    supplier: 'Magik Signage Works',
     isFeatured: false,
-    imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1000&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a3121699495?auto=format&fit=crop&w=1000&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1000&q=80'
+      'https://images.unsplash.com/photo-1542744094-3a3121699495?auto=format&fit=crop&w=1000&q=80'
     ],
-    description: 'A heavy, tactile desk monument combining concrete, brushed brass, and deep forest green resin. Inspires focus, stability, and enduring craftsmanship on any modern desk.',
+    description: 'Portable aluminum roll-up standee banner with high-resolution vinyl graphic print. Ideal for store entrances, trade shows, and festival announcements.',
     features: [
-      'Hand-Cast Polymer Concrete & Resin',
-      'Brushed Solid Brass Divider Strip',
-      'Non-Scratch Felt Bottom Cushion',
-      'Subtle Embossed MagikDesign Emblem'
+      'Anodized Aluminum Roll-Up Standee Base',
+      'Non-Curl Matte Vinyl Print Graphic',
+      'Includes Padded Carrying Travel Bag',
+      'Quick 1-Minute Assembly'
     ],
-    sizes: ['Desk Pillar (6")', 'Tower Edition (9")'],
+    sizes: ['2.5 x 6 Feet Standee', '3 x 6 Feet Executive Standee'],
     colors: [
-      { name: 'Forest Concrete', hex: '#2b443b' },
-      { name: 'Sandstone Cream', hex: '#f2ece0' },
-      { name: 'Volcanic Basalt', hex: '#27272a' }
-    ]
-  },
-  {
-    id: 'm6',
-    name: 'Legacy Hardwood & Glass Commemorative Plaque',
-    slug: 'legacy-hardwood-glass-plaque',
-    category: 'Custom Plaques',
-    price: 160.00,
-    originalPrice: 185.00,
-    rating: 4.9,
-    reviewCount: 31,
-    inStock: true,
-    stockQuantity: 10,
-    sku: 'MGD-CP-006',
-    supplier: 'Heritage Timber Mills',
-    isFeatured: false,
-    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80'
-    ],
-    description: 'Wall-mounted honor plaque crafted from sustainable FSC-certified American Walnut wood, suspended under float glass with golden brass standoff pins.',
-    features: [
-      'FSC-Certified Solid Walnut Slab',
-      'Tempered Float Glass Shield',
-      'Brass Metallic Standoff Hardware',
-      'UV Direct Print + Laser Engraving'
-    ],
-    sizes: ['8" x 10" Standard', '11" x 14" Executive', '16" x 20" Gallery Wall'],
-    colors: [
-      { name: 'Dark Walnut & Gold', hex: '#18181b' },
-      { name: 'Earthy Green Accents', hex: '#1b382b' }
+      { name: 'Silver Aluminum Base', hex: '#e8dfd1' }
     ]
   }
 ];
@@ -286,69 +276,57 @@ export const INITIAL_PRODUCTS: Product[] = [
 export const INITIAL_PURCHASE_ORDERS: PurchaseOrder[] = [
   {
     id: 'po-1',
-    poNumber: 'PO-2026-881',
-    supplierName: 'Apex Acrylic & Optics Foundry',
-    itemName: 'Championship Ring Vault Enclosures',
-    quantity: 50,
-    unitCost: 85.00,
-    totalCost: 4250.00,
+    poNumber: 'PO-MGD-101',
+    supplierName: 'Kasaragod Textile Mills',
+    itemName: 'Dry-Fit Polyester Jersey Fabric Rolls',
+    quantity: 200,
+    unitCost: 180.00,
+    totalCost: 36000.00,
     orderDate: '2026-09-10',
-    expectedDelivery: '2026-09-28',
+    expectedDelivery: '2026-09-25',
     status: 'In Transit'
   },
   {
     id: 'po-2',
-    poNumber: 'PO-2026-882',
-    supplierName: 'Veritas Bronze Sculptures',
-    itemName: 'AeroLine Bronze Castings',
-    quantity: 25,
-    unitCost: 60.00,
-    totalCost: 1500.00,
+    poNumber: 'PO-MGD-102',
+    supplierName: 'Japanese Ink Distributors',
+    itemName: 'Outdoor Solvent Flex Ink Set (CMYK)',
+    quantity: 12,
+    unitCost: 2200.00,
+    totalCost: 26400.00,
     orderDate: '2026-09-15',
-    expectedDelivery: '2026-10-02',
+    expectedDelivery: '2026-09-28',
     status: 'Pending'
-  },
-  {
-    id: 'po-3',
-    poNumber: 'PO-2026-879',
-    supplierName: 'Heritage Timber Mills',
-    itemName: 'Walnut Wood Plaque Slabs',
-    quantity: 100,
-    unitCost: 45.00,
-    totalCost: 4500.00,
-    orderDate: '2026-08-25',
-    expectedDelivery: '2026-09-05',
-    status: 'Received'
   }
 ];
 
 export const MOCK_REVIEWS: Record<string, Review[]> = {
-  'm1': [
+  'p1': [
     {
       id: 'r1',
-      productId: 'm1',
-      userName: 'Marcus Vance',
+      productId: 'p1',
+      userName: 'Faisal Mulleria',
       userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       rating: 5,
-      comment: 'The quality of this ring vault is astonishing! The LED base casts a brilliant spotlight on our state championship ring. Packaging was ultra-secure and premium.',
-      date: '2 weeks ago',
+      comment: 'We ordered 18 custom jerseys for our local football tournament in Mulleria. The sublimation print quality and dry-fit fabric comfort were outstanding! Fast delivery within 4 days.',
+      date: '1 week ago',
       verifiedBuyer: true
     },
     {
       id: 'r2',
-      productId: 'm1',
-      userName: 'Elena Rostova',
+      productId: 'p2',
+      userName: 'Suresh Kumar Badiadka',
       rating: 5,
-      comment: 'Unbelievable craftsmanship. The forest green aluminum trim matches our team colors perfectly. Will be ordering 5 more for our coaching staff.',
-      date: '1 month ago',
+      comment: 'Printed our shop banner flex at Magik Dezign. Sharp color output and heavy flex material. Best printing shop in Mulleria area!',
+      date: '2 weeks ago',
       verifiedBuyer: true
     }
   ]
 };
 
 export const INITIAL_SALES_METRICS: SalesMetrics = {
-  totalRevenue: 24850.00,
-  totalOrdersCount: 84,
-  averageOrderValue: 295.83,
-  itemsSold: 112
+  totalRevenue: 148500.00,
+  totalOrdersCount: 164,
+  averageOrderValue: 905.48,
+  itemsSold: 320
 };

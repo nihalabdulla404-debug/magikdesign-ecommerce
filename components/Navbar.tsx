@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, User, Menu, X, Sparkles, Award, Shield, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, Sparkles, Award, Shield, ArrowRight, Phone, MessageSquare } from 'lucide-react';
 import { useCart } from '../lib/cartContext';
 import { useAuth } from '../lib/authContext';
 
@@ -35,17 +35,20 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-cream-50/95 backdrop-blur-md border-b border-cream-300 transition-all duration-200 shadow-2xs">
-      {/* Top Banner with 1-Click Role Switcher */}
+      {/* Top Banner with Authentic Contact & WhatsApp Link */}
       <div className="bg-forest-900 text-cream-100 text-xs py-2 px-4 flex items-center justify-between font-medium tracking-wide">
-        <div className="hidden sm:flex items-center gap-2 max-w-7xl mx-auto">
+        <div className="hidden md:flex items-center gap-3 max-w-7xl mx-auto">
           <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
-          <span>Complimentary Laser Engraving & Free Express Shipping on Orders Over $150</span>
-          <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
+          <span>📍 Podikkalam Shopping Complex, Badiadka Road, Mulleria, Kasaragod</span>
+          <span className="text-forest-600">|</span>
+          <a href="https://wa.me/919074749147" target="_blank" rel="noreferrer" className="text-accent-gold hover:underline font-bold flex items-center gap-1">
+            <MessageSquare className="w-3 h-3 text-accent-gold" /> WhatsApp: +91 90747 49147
+          </a>
         </div>
 
         {/* 1-Click Quick Role Switcher Pill */}
-        <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
-          <span className="text-[11px] text-cream-300/80 hidden lg:inline">Role Mode:</span>
+        <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-2">
+          <span className="text-[11px] text-cream-300/80 hidden lg:inline">Mode:</span>
           <button
             onClick={handleRoleToggle}
             className="inline-flex items-center gap-1.5 bg-forest-800 hover:bg-forest-700 text-accent-gold border border-forest-600 px-3 py-1 rounded-full text-[11px] font-bold transition-all shadow-2xs group"
@@ -53,7 +56,7 @@ export const Navbar: React.FC = () => {
             {user?.role === 'admin' ? (
               <>
                 <Shield className="w-3.5 h-3.5 text-accent-gold" />
-                <span>Admin Active ➔ Switch to Customer Store</span>
+                <span>Admin Active ➔ Switch to Customer Shop</span>
               </>
             ) : (
               <>
@@ -85,16 +88,16 @@ export const Navbar: React.FC = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-2xl font-bold tracking-tight text-charcoal-900 group-hover:text-forest-900 transition-colors">
-                Magik<span className="text-forest-700">Design</span>
+                Magik<span className="text-forest-700">Dezign</span>
               </span>
               <span className="text-[10px] tracking-widest uppercase font-semibold text-forest-800/80 -mt-1">
-                Artisan Keepsakes
+                Mulleria Kasaragod
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-7">
             <Link
               href="/"
               className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
@@ -105,22 +108,28 @@ export const Navbar: React.FC = () => {
               href="/catalog"
               className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
-              All Catalog
+              All Services
             </Link>
             <Link
-              href="/catalog?category=Sports+Keepsakes"
+              href="/catalog?category=Custom+Sports+Jerseys"
               className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
-              Sports Mementos
+              Sports Jerseys
             </Link>
             <Link
-              href="/catalog?category=Artisan+Awards"
+              href="/catalog?category=Flex+%26+Vinyl+Signage"
               className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
-              Artisan Awards
+              Flex Banners
+            </Link>
+            <Link
+              href="/catalog?category=Corporate+ID+Cards+%26+Printing"
+              className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
+            >
+              ID Cards
             </Link>
 
-            {/* Admin Portal Nav Link */}
+            {/* Admin Portal Link */}
             <Link
               href="/admin"
               className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
@@ -141,7 +150,7 @@ export const Navbar: React.FC = () => {
             <form onSubmit={handleSearchSubmit} className="relative hidden sm:block">
               <input
                 type="text"
-                placeholder="Search mementos..."
+                placeholder="Search jerseys, banners, ID cards..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-44 md:w-56 pl-9 pr-8 py-2 text-xs rounded-full bg-cream-200/80 border border-cream-300 text-charcoal-900 placeholder-charcoal-900/50 focus:outline-none focus:ring-2 focus:ring-forest-900 focus:bg-white transition-all"
@@ -158,7 +167,7 @@ export const Navbar: React.FC = () => {
               )}
             </form>
 
-            {/* User Account / Auth Modal Trigger */}
+            {/* User Account / Auth Trigger */}
             {user ? (
               <Link
                 href={user.role === 'admin' ? '/admin' : '/account'}
@@ -223,7 +232,7 @@ export const Navbar: React.FC = () => {
             <form onSubmit={handleSearchSubmit} className="relative mb-3">
               <input
                 type="text"
-                placeholder="Search mementos..."
+                placeholder="Search jerseys, banners, ID cards..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-xs rounded-lg bg-cream-200 border border-cream-300 text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
@@ -243,8 +252,16 @@ export const Navbar: React.FC = () => {
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-md text-base font-semibold text-charcoal-900 hover:bg-cream-200"
             >
-              All Product Catalog
+              All Services
             </Link>
+            <a
+              href="https://wa.me/919074749147"
+              target="_blank"
+              rel="noreferrer"
+              className="block px-3 py-2 rounded-md text-base font-bold text-emerald-800 bg-emerald-50"
+            >
+              💬 WhatsApp Us: +91 90747 49147
+            </a>
             <Link
               href="/admin"
               onClick={() => setIsMobileMenuOpen(false)}
