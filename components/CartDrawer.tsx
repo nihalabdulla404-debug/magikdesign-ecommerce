@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, Truck, Tag, Check } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, Truck, Tag, Check, Sparkles } from 'lucide-react';
 import { useCart } from '../lib/cartContext';
 
 export const CartDrawer: React.FC = () => {
@@ -22,18 +22,23 @@ export const CartDrawer: React.FC = () => {
 
   if (!isCartOpen) return null;
 
-  const handleApplyPromo = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (promoCode.trim().toUpperCase() === 'MAGIK10') {
+  const applyCode = (code: string) => {
+    setPromoCode(code);
+    if (code.toUpperCase() === 'MAGIK10') {
       setAppliedDiscount(0.10);
       setDiscountMessage('10% VIP Discount Applied!');
-    } else if (promoCode.trim().toUpperCase() === 'MAGIK20') {
+    } else if (code.toUpperCase() === 'MAGIK20') {
       setAppliedDiscount(0.20);
       setDiscountMessage('20% Grand Collector Discount Applied!');
     } else {
       setDiscountMessage('Invalid code. Try "MAGIK10" for 10% off.');
       setAppliedDiscount(0);
     }
+  };
+
+  const handleApplyPromo = (e: React.FormEvent) => {
+    e.preventDefault();
+    applyCode(promoCode.trim());
   };
 
   const discountAmount = subtotal * appliedDiscount;
@@ -193,33 +198,54 @@ export const CartDrawer: React.FC = () => {
           {cart.length > 0 && (
             <div className="p-6 bg-cream-100 border-t border-cream-300 space-y-4">
               
-              {/* Promo Code Form */}
-              <form onSubmit={handleApplyPromo} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="w-3.5 h-3.5 text-charcoal-900/40 absolute left-2.5 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="Promo code (e.g. MAGIK10)"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-1 focus:ring-forest-900 uppercase"
-                  />
+              {/* Promo Code Form & 1-Click Promo Chips */}
+              <div className="space-y-2">
+                <form onSubmit={handleApplyPromo} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="w-3.5 h-3.5 text-charcoal-900/40 absolute left-2.5 top-2.5" />
+                    <input
+                      type="text"
+                      placeholder="Promo code (e.g. MAGIK10)"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-cream-300 rounded-lg text-charcoal-900 focus:outline-none focus:ring-1 focus:ring-forest-900 uppercase"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="bg-charcoal-900 text-cream-100 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-forest-900 transition-colors"
+                  >
+                    Apply
+                  </button>
+                </form>
+
+                {/* 1-Click Promo Chips */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-charcoal-800/60 font-semibold">1-Click Promos:</span>
+                  <button
+                    type="button"
+                    onClick={() => applyCode('MAGIK10')}
+                    className="text-[10px] font-bold text-forest-900 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-md transition-colors flex items-center gap-0.5"
+                  >
+                    <Sparkles className="w-2.5 h-2.5" /> MAGIK10 (10% OFF)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyCode('MAGIK20')}
+                    className="text-[10px] font-bold text-forest-900 bg-amber-100 hover:bg-amber-200 px-2 py-0.5 rounded-md transition-colors flex items-center gap-0.5"
+                  >
+                    <Sparkles className="w-2.5 h-2.5" /> MAGIK20 (20% OFF)
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  className="bg-charcoal-900 text-cream-100 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-forest-900 transition-colors"
-                >
-                  Apply
-                </button>
-              </form>
+              </div>
 
               {discountMessage && (
                 <p
                   className={`text-[11px] font-medium flex items-center gap-1 ${
-                    appliedDiscount > 0 ? 'text-forest-800' : 'text-amber-700'
+                    appliedDiscount > 0 ? 'text-forest-800 font-bold' : 'text-amber-700'
                   }`}
                 >
-                  {appliedDiscount > 0 && <Check className="w-3 h-3" />} {discountMessage}
+                  {appliedDiscount > 0 && <Check className="w-3 h-3 text-forest-900" />} {discountMessage}
                 </p>
               )}
 
@@ -230,7 +256,7 @@ export const CartDrawer: React.FC = () => {
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
                 {appliedDiscount > 0 && (
-                  <div className="flex justify-between text-forest-800 font-medium">
+                  <div className="flex justify-between text-forest-800 font-bold">
                     <span>VIP Discount ({(appliedDiscount * 100).toFixed(0)}%)</span>
                     <span>-${discountAmount.toFixed(2)}</span>
                   </div>

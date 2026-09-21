@@ -5,7 +5,7 @@ import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { INITIAL_PRODUCTS, MOCK_REVIEWS, Review } from '../../../lib/mockData';
 import { useCart } from '../../../lib/cartContext';
-import { Star, ShoppingBag, ShieldCheck, Truck, RotateCcw, Plus, Minus, Check, Sparkles, MessageSquare, Send } from 'lucide-react';
+import { Star, ShoppingBag, ShieldCheck, Truck, RotateCcw, Plus, Minus, Check, Sparkles, MessageSquare, Send, Award, FileText } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -25,7 +25,10 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'Standard');
   const [selectedColor, setSelectedColor] = useState(product.colors[0] || { name: 'Default', hex: '#1b382b' });
   const [quantity, setQuantity] = useState(1);
-  const [customEngravingText, setCustomEngravingText] = useState('');
+  const [customEngravingText, setCustomEngravingText] = useState('CHAMPIONSHIP MVP 2026 - MARCUS VANCE');
+
+  // Active Information Tab: 'overview' | 'specs' | 'reviews'
+  const [activeTab, setActiveTab] = useState<'overview' | 'specs' | 'reviews'>('overview');
 
   // Reviews State
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS[product.id] || []);
@@ -59,7 +62,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
       
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs text-charcoal-800/70 font-medium">
@@ -166,10 +169,23 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* Description */}
-          <p className="text-xs text-charcoal-800 leading-relaxed">
-            {product.description}
-          </p>
+          {/* Stock Level Visual Meter */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs font-bold text-charcoal-800">
+              <span>Stock Urgency Level:</span>
+              <span className={product.stockQuantity <= 5 ? 'text-red-600' : 'text-emerald-700'}>
+                {product.stockQuantity <= 5 ? `Only ${product.stockQuantity} Left in Stock!` : `${product.stockQuantity} Units Ready`}
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-cream-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  product.stockQuantity <= 5 ? 'bg-red-500' : 'bg-forest-900'
+                }`}
+                style={{ width: `${Math.min(100, (product.stockQuantity / 25) * 100)}%` }}
+              />
+            </div>
+          </div>
 
           {/* Size Selectors */}
           {product.sizes && product.sizes.length > 0 && (
@@ -225,22 +241,38 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Custom Laser Engraving Input */}
-          <div className="p-4 bg-cream-100 rounded-2xl border border-cream-300 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-forest-900">
-              <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
-              <span>Complimentary Personalization Engraving</span>
+          {/* Custom Laser Engraving Input & LIVE METALLIC PREVIEW */}
+          <div className="p-4 bg-cream-100 rounded-2xl border border-cream-300 space-y-3">
+            <div className="flex items-center justify-between text-xs font-bold text-forest-900">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
+                <span>Complimentary Personalization Engraving</span>
+              </span>
+              <span className="text-[10px] bg-accent-gold text-forest-950 px-2 py-0.5 rounded font-bold">FREE</span>
             </div>
+
             <input
               type="text"
               placeholder="e.g., MVP 2026 - Marcus Vance #23"
               value={customEngravingText}
               onChange={(e) => setCustomEngravingText(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+              className="w-full px-3 py-2 text-xs bg-white border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900 uppercase tracking-wide font-medium"
             />
-            <p className="text-[10px] text-charcoal-800/60">
-              Enter recipient name, score, or event date. Included free of charge.
-            </p>
+
+            {/* LIVE REALISTIC METALLIC BRASS PLATE PREVIEW */}
+            {customEngravingText.trim() && (
+              <div className="mt-2 p-3 bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 rounded-xl border border-amber-400 shadow-sm text-center relative overflow-hidden">
+                <div className="text-[9px] uppercase tracking-widest text-amber-900/60 font-bold mb-0.5">
+                  ★ Live Laser Engraving Preview Plate ★
+                </div>
+                <div className="font-serif text-xs font-bold text-amber-950 tracking-wider uppercase border-b border-amber-400/60 pb-1">
+                  {customEngravingText}
+                </div>
+                <div className="text-[8px] text-amber-900/70 tracking-widest uppercase mt-0.5">
+                  MagikDesign Hand-Crafted Inscription
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quantity & Add to Cart CTA */}
@@ -294,155 +326,195 @@ export default function ProductDetailPage() {
 
       </div>
 
-      {/* Feature Checklist */}
-      {product.features && product.features.length > 0 && (
-        <div className="bg-cream-100 rounded-3xl p-8 border border-cream-300">
-          <h3 className="font-serif text-xl font-bold text-charcoal-900 mb-4">
-            Master Craftsmanship Specifications
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {product.features.map((feat, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-charcoal-800">
-                <Check className="w-4 h-4 text-forest-900 shrink-0 mt-0.5" />
-                <span className="font-medium">{feat}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* USER-FRIENDLY INFORMATION TABS SECTION */}
+      <div className="bg-white rounded-3xl p-8 sm:p-10 border border-cream-300 shadow-luxury space-y-8">
+        
+        {/* Tab Controls */}
+        <div className="flex border-b border-cream-200 gap-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'overview'
+                ? 'border-forest-900 text-forest-900'
+                : 'border-transparent text-charcoal-800/60 hover:text-charcoal-900'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Product Overview</span>
+          </button>
 
-      {/* Customer Reviews & Ratings Section */}
-      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-cream-300 shadow-luxury space-y-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-cream-200">
-          <div>
-            <h3 className="font-serif text-2xl font-bold text-charcoal-900">
-              Customer Reviews & Ratings
-            </h3>
-            <p className="text-xs text-charcoal-800/70 mt-0.5">
-              Real feedback from verified sports collectors & corporate clients.
-            </p>
-          </div>
+          <button
+            onClick={() => setActiveTab('specs')}
+            className={`pb-3 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'specs'
+                ? 'border-forest-900 text-forest-900'
+                : 'border-transparent text-charcoal-800/60 hover:text-charcoal-900'
+            }`}
+          >
+            <Award className="w-4 h-4" />
+            <span>Craftsmanship Specs</span>
+          </button>
 
-          <div className="flex items-center gap-4 bg-cream-100 px-5 py-3 rounded-2xl border border-cream-300">
-            <div className="text-center">
-              <div className="font-serif text-3xl font-bold text-forest-900">
-                {product.rating.toFixed(1)}
-              </div>
-              <div className="flex text-amber-400 text-xs">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                ))}
-              </div>
-            </div>
-            <div className="text-xs text-charcoal-800/70 border-l border-cream-300 pl-4">
-              <span className="font-bold text-charcoal-900">{reviews.length}</span> Verified Reviews<br />
-              <span className="text-[10px] text-emerald-800 font-semibold">100% Recommended</span>
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-3 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === 'reviews'
+                ? 'border-forest-900 text-forest-900'
+                : 'border-transparent text-charcoal-800/60 hover:text-charcoal-900'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Customer Reviews ({reviews.length})</span>
+          </button>
         </div>
 
-        {/* Existing Reviews List */}
-        <div className="space-y-6">
-          {reviews.length === 0 ? (
-            <p className="text-xs text-charcoal-800/60 italic text-center py-6">
-              Be the first to review this custom memento!
+        {/* Tab 1: Overview */}
+        {activeTab === 'overview' && (
+          <div className="space-y-4 animate-fadeIn">
+            <h3 className="font-serif text-xl font-bold text-charcoal-900">About {product.name}</h3>
+            <p className="text-xs sm:text-sm text-charcoal-800 leading-relaxed max-w-3xl">
+              {product.description}
             </p>
-          ) : (
-            reviews.map((rev) => (
-              <div key={rev.id} className="p-4 bg-cream-50 rounded-2xl border border-cream-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-forest-900 text-cream-100 font-bold text-xs flex items-center justify-center">
-                      {rev.userName.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-charcoal-900">{rev.userName}</h4>
-                      {rev.verifiedBuyer && (
-                        <span className="text-[10px] text-emerald-700 font-medium">
-                          Verified Buyer
-                        </span>
-                      )}
-                    </div>
+            <div className="p-4 bg-cream-100 rounded-2xl border border-cream-200 max-w-xl text-xs text-charcoal-800 space-y-1">
+              <span className="font-bold text-forest-900 block">Collector Assurance:</span>
+              <p>Includes hand-signed certificate of authenticity, custom protective velvet collector box, and pre-installed wall/desktop mounting hardware.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Specs */}
+        {activeTab === 'specs' && (
+          <div className="space-y-4 animate-fadeIn">
+            <h3 className="font-serif text-xl font-bold text-charcoal-900">Material & Precision Engineering</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl">
+              {product.features && product.features.map((feat, idx) => (
+                <div key={idx} className="flex items-start gap-2.5 p-3 bg-cream-50 rounded-xl border border-cream-200 text-xs text-charcoal-800">
+                  <Check className="w-4 h-4 text-forest-900 shrink-0 mt-0.5" />
+                  <span className="font-semibold">{feat}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Reviews */}
+        {activeTab === 'reviews' && (
+          <div className="space-y-8 animate-fadeIn">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-cream-200">
+              <div className="flex items-center gap-4 bg-cream-100 px-5 py-3 rounded-2xl border border-cream-300">
+                <div className="text-center">
+                  <div className="font-serif text-3xl font-bold text-forest-900">
+                    {product.rating.toFixed(1)}
                   </div>
-                  <span className="text-[10px] text-charcoal-800/50">{rev.date}</span>
+                  <div className="flex text-amber-400 text-xs">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
                 </div>
-
-                <div className="flex text-amber-400">
-                  {[...Array(rev.rating)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                  ))}
+                <div className="text-xs text-charcoal-800/70 border-l border-cream-300 pl-4">
+                  <span className="font-bold text-charcoal-900">{reviews.length}</span> Verified Reviews<br />
+                  <span className="text-[10px] text-emerald-800 font-semibold">100% Recommended</span>
                 </div>
-
-                <p className="text-xs text-charcoal-800 leading-relaxed">{rev.comment}</p>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Add Review Form */}
-        <div className="pt-6 border-t border-cream-200">
-          <h4 className="font-serif text-lg font-bold text-charcoal-900 mb-4 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-forest-900" />
-            <span>Write a Review</span>
-          </h4>
-
-          {reviewSubmitted && (
-            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 rounded-xl font-medium">
-              Thank you! Your review has been published.
             </div>
-          )}
 
-          <form onSubmit={handleAddReview} className="space-y-4 max-w-xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-charcoal-900 mb-1">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g., Jonathan Reed"
-                  value={newReviewAuthor}
-                  onChange={(e) => setNewReviewAuthor(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
-                />
-              </div>
+            {/* Existing Reviews List */}
+            <div className="space-y-4">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="p-4 bg-cream-50 rounded-2xl border border-cream-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-forest-900 text-cream-100 font-bold text-xs flex items-center justify-center">
+                        {rev.userName.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-charcoal-900">{rev.userName}</h4>
+                        {rev.verifiedBuyer && (
+                          <span className="text-[10px] text-emerald-700 font-medium">Verified Buyer</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-charcoal-800/50">{rev.date}</span>
+                  </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-charcoal-900 mb-1">Rating</label>
-                <select
-                  value={newReviewRating}
-                  onChange={(e) => setNewReviewRating(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+                  <div className="flex text-amber-400">
+                    {[...Array(rev.rating)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-charcoal-800 leading-relaxed">{rev.comment}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Write a review form */}
+            <div className="pt-6 border-t border-cream-200">
+              <h4 className="font-serif text-lg font-bold text-charcoal-900 mb-4 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-forest-900" />
+                <span>Write a Review</span>
+              </h4>
+
+              {reviewSubmitted && (
+                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 rounded-xl font-medium">
+                  Thank you! Your review has been published.
+                </div>
+              )}
+
+              <form onSubmit={handleAddReview} className="space-y-4 max-w-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-charcoal-900 mb-1">Your Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g., Jonathan Reed"
+                      value={newReviewAuthor}
+                      onChange={(e) => setNewReviewAuthor(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-charcoal-900 mb-1">Rating</label>
+                    <select
+                      value={newReviewRating}
+                      onChange={(e) => setNewReviewRating(Number(e.target.value))}
+                      className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+                    >
+                      <option value={5}>5 Stars - Outstanding</option>
+                      <option value={4}>4 Stars - Very Good</option>
+                      <option value={3}>3 Stars - Average</option>
+                      <option value={2}>2 Stars - Poor</option>
+                      <option value={1}>1 Star - Terrible</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-charcoal-900 mb-1">Review Comments</label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Share details about the weight, finish quality, and packaging..."
+                    value={newReviewComment}
+                    onChange={(e) => setNewReviewComment(e.target.value)}
+                    className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-forest-900 hover:bg-forest-800 text-cream-100 text-xs font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
                 >
-                  <option value={5}>5 Stars - Outstanding</option>
-                  <option value={4}>4 Stars - Very Good</option>
-                  <option value={3}>3 Stars - Average</option>
-                  <option value={2}>2 Stars - Poor</option>
-                  <option value={1}>1 Star - Terrible</option>
-                </select>
-              </div>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Submit Review</span>
+                </button>
+              </form>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-900 mb-1">Review Comments</label>
-              <textarea
-                required
-                rows={3}
-                placeholder="Share details about the weight, finish quality, and packaging..."
-                value={newReviewComment}
-                onChange={(e) => setNewReviewComment(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="bg-forest-900 hover:bg-forest-800 text-cream-100 text-xs font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Submit Review</span>
-            </button>
-          </form>
-        </div>
+          </div>
+        )}
 
       </div>
 

@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, User, Menu, X, Sparkles, Award, Shield } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, Sparkles, Award, Shield, ArrowRight } from 'lucide-react';
 import { useCart } from '../lib/cartContext';
 import { useAuth } from '../lib/authContext';
 
 export const Navbar: React.FC = () => {
   const router = useRouter();
   const { totalItems, setIsCartOpen } = useCart();
-  const { user, setIsAuthModalOpen, setAuthMode, setTargetRole } = useAuth();
+  const { user, setIsAuthModalOpen, setAuthMode, setTargetRole, login } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -23,13 +23,47 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const handleRoleToggle = async () => {
+    if (user?.role === 'admin') {
+      await login('alex.wright@magikdesign.com', 'password123', 'customer');
+      router.push('/');
+    } else {
+      await login('admin@magikdesign.com', 'admin123', 'admin');
+      router.push('/admin');
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-cream-50/90 backdrop-blur-md border-b border-cream-300 transition-all duration-200">
-      {/* Top Banner */}
-      <div className="bg-forest-900 text-cream-100 text-xs py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
-        <span>Complimentary Laser Engraving & Free Express Shipping on Orders Over $150</span>
-        <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
+    <header className="sticky top-0 z-40 bg-cream-50/95 backdrop-blur-md border-b border-cream-300 transition-all duration-200 shadow-2xs">
+      {/* Top Banner with 1-Click Role Switcher */}
+      <div className="bg-forest-900 text-cream-100 text-xs py-2 px-4 flex items-center justify-between font-medium tracking-wide">
+        <div className="hidden sm:flex items-center gap-2 max-w-7xl mx-auto">
+          <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
+          <span>Complimentary Laser Engraving & Free Express Shipping on Orders Over $150</span>
+          <Sparkles className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
+        </div>
+
+        {/* 1-Click Quick Role Switcher Pill */}
+        <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
+          <span className="text-[11px] text-cream-300/80 hidden lg:inline">Role Mode:</span>
+          <button
+            onClick={handleRoleToggle}
+            className="inline-flex items-center gap-1.5 bg-forest-800 hover:bg-forest-700 text-accent-gold border border-forest-600 px-3 py-1 rounded-full text-[11px] font-bold transition-all shadow-2xs group"
+          >
+            {user?.role === 'admin' ? (
+              <>
+                <Shield className="w-3.5 h-3.5 text-accent-gold" />
+                <span>Admin Active ➔ Switch to Customer Store</span>
+              </>
+            ) : (
+              <>
+                <Award className="w-3.5 h-3.5 text-accent-gold" />
+                <span>Customer Active ➔ Switch to Admin Portal</span>
+              </>
+            )}
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +80,7 @@ export const Navbar: React.FC = () => {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-lg bg-forest-900 flex items-center justify-center text-accent-gold shadow-md group-hover:scale-105 transition-transform duration-200">
+            <div className="w-10 h-10 rounded-xl bg-forest-900 flex items-center justify-center text-accent-gold shadow-md group-hover:scale-105 transition-transform duration-200 border border-forest-700">
               <Award className="w-6 h-6" />
             </div>
             <div className="flex flex-col">
@@ -63,113 +97,108 @@ export const Navbar: React.FC = () => {
           <nav className="hidden md:flex items-center gap-8">
             <Link
               href="/"
-              className="text-sm font-medium text-charcoal-900 hover:text-forest-900 transition-colors py-1"
+              className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
               Home
             </Link>
             <Link
               href="/catalog"
-              className="text-sm font-medium text-charcoal-900 hover:text-forest-900 transition-colors py-1"
+              className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
               All Catalog
             </Link>
             <Link
               href="/catalog?category=Sports+Keepsakes"
-              className="text-sm font-medium text-charcoal-900 hover:text-forest-900 transition-colors py-1"
+              className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
               Sports Mementos
             </Link>
             <Link
               href="/catalog?category=Artisan+Awards"
-              className="text-sm font-medium text-charcoal-900 hover:text-forest-900 transition-colors py-1"
+              className="text-sm font-semibold text-charcoal-900 hover:text-forest-900 transition-colors py-1"
             >
               Artisan Awards
             </Link>
 
-            {/* Admin Portal Nav Item for Admins */}
-            {user?.role === 'admin' && (
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-1 text-xs font-bold bg-forest-900 text-accent-gold px-3 py-1.5 rounded-full border border-forest-700 shadow-2xs hover:bg-forest-950 transition-all"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Admin Portal</span>
-              </Link>
-            )}
+            {/* Admin Portal Nav Link */}
+            <Link
+              href="/admin"
+              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                user?.role === 'admin'
+                  ? 'bg-forest-900 text-accent-gold border-forest-700 shadow-sm'
+                  : 'bg-cream-200 text-charcoal-900 border-cream-300 hover:bg-forest-900 hover:text-cream-100'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Admin Portal</span>
+            </Link>
           </nav>
 
           {/* Right Action Icons & Search */}
           <div className="flex items-center gap-4">
             
-            {/* Search Input Bar */}
+            {/* Search Input Bar with Clear Button */}
             <form onSubmit={handleSearchSubmit} className="relative hidden sm:block">
               <input
                 type="text"
                 placeholder="Search mementos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-44 md:w-56 pl-9 pr-4 py-2 text-xs rounded-full bg-cream-200/80 border border-cream-300 text-charcoal-900 placeholder-charcoal-900/50 focus:outline-none focus:ring-2 focus:ring-forest-900 focus:bg-white transition-all"
+                className="w-44 md:w-56 pl-9 pr-8 py-2 text-xs rounded-full bg-cream-200/80 border border-cream-300 text-charcoal-900 placeholder-charcoal-900/50 focus:outline-none focus:ring-2 focus:ring-forest-900 focus:bg-white transition-all"
               />
               <Search className="w-4 h-4 text-charcoal-900/60 absolute left-3 top-2.5" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-2.5 text-charcoal-800/50 hover:text-charcoal-900"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </form>
 
-            {/* User Account / Auth Trigger */}
+            {/* User Account / Auth Modal Trigger */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href={user.role === 'admin' ? '/admin' : '/account'}
-                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-cream-200/70 transition-colors text-charcoal-900"
-                  title={user.role === 'admin' ? 'Admin Dashboard' : 'Account Dashboard'}
-                >
-                  {user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.avatarUrl}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full border border-forest-900/20 object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 flex items-center justify-center text-xs font-bold">
-                      {user.name.charAt(0)}
-                    </div>
-                  )}
-                  <div className="hidden lg:flex flex-col text-left">
-                    <span className="text-xs font-semibold max-w-[100px] truncate leading-tight">
-                      {user.name}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-forest-800">
-                      {user.role === 'admin' ? '⚙️ Admin' : 'Customer'}
-                    </span>
+              <Link
+                href={user.role === 'admin' ? '/admin' : '/account'}
+                className="flex items-center gap-2 p-1.5 rounded-full hover:bg-cream-200/70 transition-colors text-charcoal-900"
+                title={user.role === 'admin' ? 'Admin Dashboard' : 'Account Dashboard'}
+              >
+                {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full border border-forest-900/20 object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 flex items-center justify-center text-xs font-bold">
+                    {user.name.charAt(0)}
                   </div>
-                </Link>
-              </div>
+                )}
+                <div className="hidden lg:flex flex-col text-left">
+                  <span className="text-xs font-bold max-w-[100px] truncate leading-tight">
+                    {user.name}
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-forest-800">
+                    {user.role === 'admin' ? '⚙️ Store Admin' : 'Member'}
+                  </span>
+                </div>
+              </Link>
             ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setTargetRole('customer');
-                    setAuthMode('login');
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="p-2 text-charcoal-900 hover:text-forest-900 hover:bg-cream-200/70 rounded-full transition-colors flex items-center gap-1"
-                  aria-label="Sign in"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="hidden sm:inline text-xs font-semibold">Sign In</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTargetRole('admin');
-                    setAuthMode('login');
-                    setIsAuthModalOpen(true);
-                  }}
-                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold bg-forest-900 text-accent-gold px-3 py-1.5 rounded-full hover:bg-forest-950 transition-colors shadow-2xs"
-                >
-                  <Shield className="w-3 h-3" />
-                  <span>Admin</span>
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setTargetRole('customer');
+                  setAuthMode('login');
+                  setIsAuthModalOpen(true);
+                }}
+                className="p-2 text-charcoal-900 hover:text-forest-900 hover:bg-cream-200/70 rounded-full transition-colors flex items-center gap-1.5"
+                aria-label="Sign in"
+              >
+                <User className="w-5 h-5" />
+                <span className="hidden sm:inline text-xs font-semibold">Sign In</span>
+              </button>
             )}
 
             {/* Cart Slide-Over Trigger */}
@@ -201,30 +230,28 @@ export const Navbar: React.FC = () => {
               />
               <Search className="w-4 h-4 text-charcoal-900/60 absolute left-3 top-3" />
             </form>
+
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-900 hover:bg-cream-200"
+              className="block px-3 py-2 rounded-md text-base font-semibold text-charcoal-900 hover:bg-cream-200"
             >
               Home
             </Link>
             <Link
               href="/catalog"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-charcoal-900 hover:bg-cream-200"
+              className="block px-3 py-2 rounded-md text-base font-semibold text-charcoal-900 hover:bg-cream-200"
             >
               All Product Catalog
             </Link>
-
-            {user?.role === 'admin' && (
-              <Link
-                href="/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-bold text-accent-gold bg-forest-900"
-              >
-                ⚙️ Admin Management Portal
-              </Link>
-            )}
+            <Link
+              href="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-bold text-accent-gold bg-forest-900"
+            >
+              ⚙️ Executive Admin Portal
+            </Link>
           </div>
         )}
       </div>

@@ -1,14 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { HeroBanner } from '../components/HeroBanner';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES, INITIAL_PRODUCTS } from '../lib/mockData';
-import { ArrowRight, Star, Award, Shield, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, Star, Award, Shield, Sparkles, SlidersHorizontal, Package, CheckCircle2, Truck } from 'lucide-react';
 
 export default function HomePage() {
-  const featuredProducts = INITIAL_PRODUCTS.filter(p => p.isFeatured).slice(0, 4);
+  const [selectedTab, setSelectedTab] = useState('All');
+
+  const filteredFeatured = INITIAL_PRODUCTS.filter(p => {
+    if (selectedTab === 'All') return p.isFeatured;
+    return p.category === selectedTab;
+  }).slice(0, 4);
 
   return (
     <div className="space-y-20 pb-20">
@@ -73,10 +78,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Featured Products Grid */}
+      {/* 3. Featured Products Grid with Category Tabs */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-cream-100 rounded-3xl p-8 sm:p-12 border border-cream-300 shadow-sm">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest-900 text-cream-100 text-[10px] font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-3 h-3 text-accent-gold" />
@@ -87,24 +92,77 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <Link
-              href="/catalog"
-              className="inline-flex items-center gap-2 bg-white text-forest-900 border border-cream-300 text-xs font-bold px-5 py-2.5 rounded-full hover:bg-forest-900 hover:text-cream-100 transition-all shadow-2xs"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Browse Catalog & Filters</span>
-            </Link>
+            {/* Category Pill Tabs */}
+            <div className="flex flex-wrap gap-2">
+              {['All', 'Sports Keepsakes', 'Artisan Awards', 'Desktop Monuments'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSelectedTab(tab)}
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all ${
+                    selectedTab === tab
+                      ? 'bg-forest-900 text-accent-gold shadow-xs'
+                      : 'bg-white text-charcoal-800/70 hover:bg-cream-200'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
+            {filteredFeatured.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. Craftsmanship & Custom Engraving Showcase */}
+      {/* 4. USER-FRIENDLY 3-STEP GUIDE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-xs font-bold uppercase tracking-widest text-forest-800">
+            Intuitive Ordering Process
+          </span>
+          <h2 className="font-serif text-3xl font-bold text-charcoal-900 mt-1">
+            How MagikDesign Works in 3 Easy Steps
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white p-8 rounded-3xl border border-cream-300 shadow-luxury space-y-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-forest-900 text-accent-gold mx-auto flex items-center justify-center font-serif text-xl font-bold shadow-md">
+              1
+            </div>
+            <h3 className="font-serif text-lg font-bold text-charcoal-900">Choose Your Memento</h3>
+            <p className="text-xs text-charcoal-800/70 leading-relaxed">
+              Select from championship ring vaults, cast bronze statues, desktop monoliths, or solid hardwood wall plaques.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-3xl border border-cream-300 shadow-luxury space-y-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-forest-900 text-accent-gold mx-auto flex items-center justify-center font-serif text-xl font-bold shadow-md">
+              2
+            </div>
+            <h3 className="font-serif text-lg font-bold text-charcoal-900">Personalize Laser Engraving</h3>
+            <p className="text-xs text-charcoal-800/70 leading-relaxed">
+              Type your custom recipient name, event date, or team crest and preview your metallic brass plaque in real time.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-3xl border border-cream-300 shadow-luxury space-y-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-forest-900 text-accent-gold mx-auto flex items-center justify-center font-serif text-xl font-bold shadow-md">
+              3
+            </div>
+            <h3 className="font-serif text-lg font-bold text-charcoal-900">Insured White-Glove Delivery</h3>
+            <p className="text-xs text-charcoal-800/70 leading-relaxed">
+              Your memento is packed in a protective velvet collector box and shipped with express tracking directly to your door.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Craftsmanship & Custom Engraving Showcase */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-forest-900 rounded-3xl p-8 sm:p-14 text-cream-100 relative overflow-hidden shadow-2xl border border-forest-800">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -160,80 +218,6 @@ export default function HomePage() {
               </div>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Customer Reviews / Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-widest text-forest-800">
-            Collector Praise
-          </span>
-          <h2 className="font-serif text-3xl font-bold text-charcoal-900 mt-1">
-            Trusted by Athletic Directors & Championship Teams
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-cream-300 shadow-luxury space-y-4">
-            <div className="flex text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400" />
-              ))}
-            </div>
-            <p className="text-xs text-charcoal-800 leading-relaxed italic">
-              &quot;The Ring Vault we ordered for our state championship team exceeded all expectations. The built-in LED spotlight makes the championship ring look like it belongs in the Hall of Fame!&quot;
-            </p>
-            <div className="pt-2 border-t border-cream-200 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 font-bold flex items-center justify-center text-xs">
-                MV
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-charcoal-900">Marcus Vance</h4>
-                <p className="text-[10px] text-charcoal-800/60">Athletic Director, Metro High</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-cream-300 shadow-luxury space-y-4">
-            <div className="flex text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400" />
-              ))}
-            </div>
-            <p className="text-xs text-charcoal-800 leading-relaxed italic">
-              &quot;MagikDesign crafted 24 custom bronze trophies for our annual charity marathon. The weight, finish, and engraving were immaculate. Fast 3-day turnaround!&quot;
-            </p>
-            <div className="pt-2 border-t border-cream-200 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 font-bold flex items-center justify-center text-xs">
-                DS
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-charcoal-900">David Sterling</h4>
-                <p className="text-[10px] text-charcoal-800/60">Event Director, Sterling Sports</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-cream-300 shadow-luxury space-y-4">
-            <div className="flex text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400" />
-              ))}
-            </div>
-            <p className="text-xs text-charcoal-800 leading-relaxed italic">
-              &quot;Sublime architectural desk monument. The forest green resin and brass contrast perfectly on my oak desk. Will definitely purchase again for executive gifts.&quot;
-            </p>
-            <div className="pt-2 border-t border-cream-200 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-forest-900 text-cream-100 font-bold flex items-center justify-center text-xs">
-                ER
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-charcoal-900">Elena Rostova</h4>
-                <p className="text-[10px] text-charcoal-800/60">Managing Partner, Rostova Art</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>

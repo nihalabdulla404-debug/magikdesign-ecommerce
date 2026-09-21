@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '../../lib/cartContext';
 import { useAuth } from '../../lib/authContext';
-import { Check, ShieldCheck, CreditCard, Truck, Lock, ArrowRight, ArrowLeft, Printer, CheckCircle2 } from 'lucide-react';
+import { Check, ShieldCheck, CreditCard, Truck, Lock, ArrowRight, ArrowLeft, Printer, CheckCircle2, Sparkles } from 'lucide-react';
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart } = useCart();
@@ -14,8 +14,8 @@ export default function CheckoutPage() {
 
   // Shipping Address Form State
   const [formData, setFormData] = useState({
-    fullName: user?.name || '',
-    email: user?.email || '',
+    fullName: user?.name || 'Alexander Wright',
+    email: user?.email || 'alex.wright@magikdesign.com',
     phone: '+1 (555) 234-5678',
     address: '740 Grand Central Parkway, Suite 12B',
     city: 'New York',
@@ -43,6 +43,25 @@ export default function CheckoutPage() {
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
+  const handleQuickAutoFill = () => {
+    setFormData({
+      fullName: 'Alexander Wright',
+      email: 'alex.wright@magikdesign.com',
+      phone: '+1 (555) 987-6543',
+      address: '740 Grand Central Parkway, Suite 12B',
+      city: 'New York',
+      state: 'NY',
+      zip: '10012',
+      country: 'United States',
+    });
+    setCardData({
+      cardNumber: '4532 8812 9940 8892',
+      cardName: 'Alexander Wright',
+      expiry: '12/28',
+      cvv: '448',
+    });
+  };
+
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setStep(2);
@@ -66,7 +85,7 @@ export default function CheckoutPage() {
       setIsProcessing(false);
       clearCart();
       setStep(4);
-    }, 2000);
+    }, 1800);
   };
 
   // Step 4: Order Receipt Confirmation View
@@ -74,7 +93,7 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="bg-white rounded-3xl p-8 sm:p-12 border border-cream-300 shadow-luxury text-center space-y-6">
-          <div className="w-20 h-20 bg-forest-900 text-accent-gold rounded-full mx-auto flex items-center justify-center shadow-lg">
+          <div className="w-20 h-20 bg-forest-900 text-accent-gold rounded-full mx-auto flex items-center justify-center shadow-lg border border-forest-700">
             <CheckCircle2 className="w-10 h-10" />
           </div>
 
@@ -142,11 +161,22 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
-      {/* Back Link */}
-      <Link href="/catalog" className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal-800/70 hover:text-forest-900">
-        <ArrowLeft className="w-4 h-4" />
-        <span>Return to E-Store Catalog</span>
-      </Link>
+      {/* Back Link & 1-Click Auto Fill Demo Banner */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <Link href="/catalog" className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal-800/70 hover:text-forest-900">
+          <ArrowLeft className="w-4 h-4" />
+          <span>Return to E-Store Catalog</span>
+        </Link>
+
+        {/* 1-CLICK DEMO AUTO-FILL BUTTON */}
+        <button
+          onClick={handleQuickAutoFill}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-forest-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+          <span>⚡ 1-Click Auto-Fill Demo Shipping & Card</span>
+        </button>
+      </div>
 
       {/* Checkout Progress Steps */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-cream-300 shadow-2xs">
@@ -437,7 +467,7 @@ export default function CheckoutPage() {
                       required
                       value={cardData.cardNumber}
                       onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })}
-                      className="w-full px-3 py-2.5 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900"
+                      className="w-full px-3 py-2.5 text-xs bg-cream-50 border border-cream-300 rounded-xl text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-900 font-mono"
                     />
                   </div>
 
@@ -472,7 +502,7 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     placeholder="magikdesign@upi"
-                    className="w-full px-3 py-2 text-xs bg-white border border-cream-300 rounded-xl text-center"
+                    className="w-full px-3 py-2 text-xs bg-white border border-cream-300 rounded-xl text-center font-mono"
                   />
                 </div>
               )}
