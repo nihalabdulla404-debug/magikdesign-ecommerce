@@ -1,9 +1,5 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index.js"
-    }
-  ]
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install"
 }

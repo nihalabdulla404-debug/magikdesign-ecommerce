@@ -187,15 +187,10 @@ const DB = {
                 createdAt: Date.now()
             });
         }
-
-        // Auto-login session by default on initial launch
-        if (DB.get('magik_session_active') === null) {
-            DB.set('magik_session_active', true);
-        }
     }
 };
 
-// --- REAL-TIME MULTI-TAB SYNC ENGINE ---
+// --- REAL-TIME MULTI-TAB & MULTI-DEVICE CLOUD SYNC ENGINE ---
 const SyncEngine = {
     channel: null,
     init: () => {
@@ -204,7 +199,7 @@ const SyncEngine = {
                 SyncEngine.channel = new BroadcastChannel('magikdesign_sync_channel');
                 SyncEngine.channel.onmessage = (event) => {
                     if (event.data === 'sync_refresh') {
-                        App.renderAll();
+                        App.renderAllSilently();
                     }
                 };
             }
@@ -214,14 +209,16 @@ const SyncEngine = {
 
         window.addEventListener('storage', (event) => {
             if (event.key && event.key.startsWith('magik_')) {
-                App.renderAll();
+                App.renderAllSilently();
             }
         });
 
-        // Periodic auto-refresh every 10 seconds to update sitting timers live
-        setInterval(() => {
-            App.renderAllSilently();
-        }, 10000);
+        // 3-Second Live Global Cloud Polling (Syncs live across all staff devices)
+        setInterval(async () => {
+            if (AuthGate.isLoggedIn()) {
+                await API.syncWithCloud();
+            }
+        }, 3000);
     },
     notifyTabs: () => {
         if (SyncEngine.channel) {
@@ -236,7 +233,7 @@ const AuthGate = {
         return !!DB.get('magik_auth_creds');
     },
     isLoggedIn: () => {
-        return DB.get('magik_session_active') === true;
+        return sessionStorage.getItem('magik_session_active') === 'true';
     },
     checkState: () => {
         const authOverlay = document.getElementById('auth-overlay');
@@ -274,7 +271,7 @@ const AuthGate = {
             password: password.trim(),
             createdAt: Date.now()
         });
-        DB.set('magik_session_active', true);
+        sessionStorage.setItem('magik_session_active', 'true');
         AuthGate.checkState();
     },
     login: (username, password) => {
@@ -284,40 +281,58 @@ const AuthGate = {
         const inputPass = (password || '').trim();
 
         if (inputUser === creds.username && inputPass === creds.password) {
-            DB.set('magik_session_active', true);
+            sessionStorage.setItem('magik_session_active', 'true');
             AuthGate.checkState();
         } else if (inputUser === 'admin' && inputPass === 'magik123') {
-            // Fallback default credential override
             DB.set('magik_auth_creds', { username: 'admin', password: 'magik123', createdAt: Date.now() });
-            DB.set('magik_session_active', true);
+            sessionStorage.setItem('magik_session_active', 'true');
             AuthGate.checkState();
         } else {
-            alert(`Invalid credentials. Use Username: admin and Password: magik123`);
+            alert('Invalid username or password. Please check your credentials and try again.');
         }
     },
-    quickLogin: () => {
-        DB.set('magik_auth_creds', { username: 'admin', password: 'magik123', createdAt: Date.now() });
-        DB.set('magik_session_active', true);
-        AuthGate.checkState();
-    },
     logout: () => {
-        DB.set('magik_session_active', false);
+        sessionStorage.removeItem('magik_session_active');
         AuthGate.checkState();
     }
 };
 
 // --- BACKEND DATABASE REST API SYNC ENGINE ---
 const API = {
+    syncWithCloud: async () => {
+        try {
+            const [ordersRes, leadsRes] = await Promise.all([
+                fetch('/api/orders'),
+                fetch('/api/leads')
+            ]);
+            if (ordersRes.ok && leadsRes.ok) {
+                const orders = await ordersRes.json();
+                const leads = await leadsRes.json();
+
+                const currOrdersStr = JSON.stringify(DB.get('magik_orders') || []);
+                const currLeadsStr = JSON.stringify(DB.get('magik_leads') || []);
+
+                const newOrdersStr = JSON.stringify(orders);
+                const newLeadsStr = JSON.stringify(leads);
+
+                if (currOrdersStr !== newOrdersStr || currLeadsStr !== newLeadsStr) {
+                    DB.set('magik_orders', orders);
+                    DB.set('magik_leads', leads);
+                    App.renderAllSilently();
+                }
+            }
+        } catch (e) {}
+    },
     fetchLeads: async () => {
         try {
             const res = await fetch('/api/leads');
             if (res.ok) {
-                const data = await res.json();
-                DB.set('magik_leads', data);
-                return data;
+                const serverLeads = await res.json();
+                DB.set('magik_leads', serverLeads);
+                return serverLeads;
             }
         } catch (e) {
-            console.log('Backend API offline, falling back to local storage:', e);
+            console.log('Backend API offline, using local storage:', e);
         }
         return DB.get('magik_leads') || [];
     },
@@ -325,76 +340,118 @@ const API = {
         try {
             const res = await fetch('/api/orders');
             if (res.ok) {
-                const data = await res.json();
-                DB.set('magik_orders', data);
-                return data;
+                const serverOrders = await res.json();
+                DB.set('magik_orders', serverOrders);
+                return serverOrders;
             }
         } catch (e) {
-            console.log('Backend API offline, falling back to local storage:', e);
+            console.log('Backend API offline, using local storage:', e);
         }
         return DB.get('magik_orders') || [];
     },
     saveLead: async (leadData) => {
+        let leads = LeadsModule.getLeads();
+        if (!leads.find(l => l.id === leadData.id)) {
+            leads.unshift(leadData);
+            DB.set('magik_leads', leads);
+        }
         try {
             await fetch('/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(leadData)
             });
-            await API.fetchLeads();
         } catch (e) {
             console.error('API Save Lead Error:', e);
         }
     },
     updateLeadStatus: async (leadId, status) => {
+        let leads = LeadsModule.getLeads();
+        const lead = leads.find(l => l.id === leadId);
+        if (lead) {
+            lead.status = status;
+            DB.set('magik_leads', leads);
+        }
         try {
             await fetch(`/api/leads/${leadId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
             });
-            await API.fetchLeads();
         } catch (e) {
             console.error('API Update Lead Error:', e);
         }
     },
     deleteLead: async (leadId) => {
+        let leads = LeadsModule.getLeads().filter(l => l.id !== leadId);
+        DB.set('magik_leads', leads);
         try {
             await fetch(`/api/leads/${leadId}`, { method: 'DELETE' });
-            await API.fetchLeads();
         } catch (e) {
             console.error('API Delete Lead Error:', e);
         }
     },
-    saveOrder: async (orderData) => {
+    saveOrder: async (orderData, isNew = false) => {
         try {
-            await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-            await API.fetchOrders();
-            await API.fetchLeads();
+            if (isNew) {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                if (res.ok) {
+                    const savedOrder = await res.json();
+                    let orders = OrdersModule.getOrders();
+                    const idx = orders.findIndex(o => o.id === orderData.id || o.id === savedOrder.id);
+                    if (idx >= 0) {
+                        orders[idx] = savedOrder;
+                    } else {
+                        orders.unshift(savedOrder);
+                    }
+                    DB.set('magik_orders', orders);
+                    return savedOrder;
+                }
+            } else {
+                const res = await fetch(`/api/orders/${orderData.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                if (!res.ok) {
+                    await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    });
+                }
+            }
         } catch (e) {
             console.error('API Save Order Error:', e);
         }
     },
     updateOrderStage: async (orderId, stage, simulateDelay = false) => {
+        let orders = OrdersModule.getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+            order.stage = stage;
+            order.stageEnteredAt = simulateDelay ? Date.now() - (25 * 3600 * 1000) : Date.now();
+            DB.set('magik_orders', orders);
+        }
         try {
             await fetch(`/api/orders/${orderId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stage, simulateDelay })
             });
-            await API.fetchOrders();
         } catch (e) {
             console.error('API Update Order Error:', e);
         }
     },
     deleteOrder: async (orderId) => {
+        let orders = OrdersModule.getOrders().filter(o => o.id !== orderId);
+        DB.set('magik_orders', orders);
         try {
             await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
-            await API.fetchOrders();
         } catch (e) {
             console.error('API Delete Order Error:', e);
         }
@@ -466,17 +523,17 @@ const LeadsModule = {
 const OrdersModule = {
     getOrders: () => DB.get('magik_orders') || [],
 
-    addOrder: async (customerName, mobile, itemType, size, quantity, price, workDetails, convertedLeadId = '') => {
+    addOrder: async (customerName, mobile, itemType, size, quantity, price, workDetails, convertedLeadId = '', takenBy = '') => {
+        const finalTakenBy = (takenBy || '').trim() || (DB.get('magik_auth_creds')?.username || 'Staff Desk');
         if (!customerName || !mobile || !itemType) {
             return alert('Customer name, mobile number, and item type are required.');
         }
 
         const orders = OrdersModule.getOrders();
-        const orderNum = 'ORD-' + (1001 + orders.length);
 
         const newOrder = {
-            id: 'ord-' + Date.now(),
-            orderNumber: orderNum,
+            id: 'ord-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+            orderNumber: 'ORD-PENDING',
             customerName: customerName.trim(),
             mobile: mobile.trim(),
             itemType: itemType.trim(),
@@ -484,6 +541,8 @@ const OrdersModule = {
             quantity: parseInt(quantity) || 1,
             price: parseFloat(price) || 0,
             workDetails: workDetails ? workDetails.trim() : '',
+            takenBy: finalTakenBy,
+            stageNotes: [],
             stage: 'Quotation',
             isPaid: false,
             stageEnteredAt: Date.now(),
@@ -498,10 +557,108 @@ const OrdersModule = {
             LeadsModule.updateStatus(convertedLeadId, 'Converted');
         }
 
+        // Reset form inputs
+        const nameEl = document.getElementById('ord-customer-name');
+        const mobEl = document.getElementById('ord-mobile');
+        const typeEl = document.getElementById('ord-item-type');
+        const sizeEl = document.getElementById('ord-size');
+        const priceEl = document.getElementById('ord-price');
+        const detailsEl = document.getElementById('ord-work-details');
+        const leadIdEl = document.getElementById('ord-converted-lead-id');
+
+        if (nameEl) nameEl.value = '';
+        if (mobEl) mobEl.value = '';
+        if (typeEl) typeEl.value = '';
+        if (sizeEl) sizeEl.value = '';
+        if (priceEl) priceEl.value = '';
+        if (detailsEl) detailsEl.value = '';
+        if (leadIdEl) leadIdEl.value = '';
+
         App.closeModal('order-modal');
         App.renderAll();
-        await API.saveOrder(newOrder);
+        await API.saveOrder(newOrder, true);
         App.renderAll();
+    },
+
+    openStageNoteModal: (orderId) => {
+        const order = OrdersModule.getOrders().find(o => o.id === orderId);
+        if (!order) return;
+
+        document.getElementById('note-order-id').value = order.id;
+        document.getElementById('note-modal-order-title').innerText = `${order.orderNumber} - ${order.customerName}`;
+        document.getElementById('note-modal-stage-subtitle').innerText = `Current Phase: ${order.stage} (${order.itemType})`;
+        document.getElementById('note-text-input').value = '';
+        document.getElementById('note-is-warning-check').checked = false;
+
+        const container = document.getElementById('existing-notes-container');
+        if (container) {
+            if (order.stageNotes && order.stageNotes.length > 0) {
+                let html = `<div style="font-weight:700; font-size:0.8rem; text-transform:uppercase; color:var(--text-light); margin-bottom:0.4rem;">Existing Notes & Alerts:</div>`;
+                html += `<div style="display:flex; flex-direction:column; gap:0.4rem; max-height:160px; overflow-y:auto;">`;
+                order.stageNotes.forEach(n => {
+                    html += n.isWarning ?
+                        `<div style="background:#fef2f2; border:1px solid #fca5a5; border-left:4px solid var(--danger); padding:0.45rem 0.65rem; border-radius:4px; font-size:0.8rem; color:#991b1b; display:flex; justify-content:space-between; align-items:center;">
+                            <div><i class="fa-solid fa-triangle-exclamation"></i> <strong>STAGE ALERT (${n.stage}):</strong> ${App.escapeHtml(n.text)}</div>
+                            <button type="button" onclick="OrdersModule.deleteStageNote('${order.id}', '${n.id}')" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:1rem; padding:0 0.3rem;" title="Delete Alert">&times;</button>
+                         </div>` :
+                        `<div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:4px solid #0284c7; padding:0.45rem 0.65rem; border-radius:4px; font-size:0.8rem; color:#075985; display:flex; justify-content:space-between; align-items:center;">
+                            <div><i class="fa-solid fa-note-sticky"></i> <strong>Note (${n.stage}):</strong> ${App.escapeHtml(n.text)}</div>
+                            <button type="button" onclick="OrdersModule.deleteStageNote('${order.id}', '${n.id}')" style="background:none; border:none; color:#0284c7; cursor:pointer; font-size:1rem; padding:0 0.3rem;" title="Delete Note">&times;</button>
+                         </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); font-style:italic;">No notes or alerts added yet for this order.</div>';
+            }
+        }
+
+        App.openModal('stage-note-modal');
+    },
+
+    saveStageNote: async () => {
+        const orderId = document.getElementById('note-order-id').value;
+        const text = document.getElementById('note-text-input').value.trim();
+        const isWarning = document.getElementById('note-is-warning-check').checked;
+
+        const orders = OrdersModule.getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+
+        if (text) {
+            if (!order.stageNotes) order.stageNotes = [];
+            order.stageNotes.unshift({
+                id: 'note-' + Date.now(),
+                stage: order.stage,
+                text: text,
+                isWarning: isWarning,
+                createdAt: Date.now()
+            });
+        }
+
+        DB.set('magik_orders', orders);
+        App.closeModal('stage-note-modal');
+        App.renderAll();
+        await API.saveOrder(order);
+        App.renderAll();
+    },
+
+    deleteStageNote: async (orderId, noteId) => {
+        const orders = OrdersModule.getOrders();
+        const order = orders.find(o => o.id === orderId);
+        if (!order || !order.stageNotes) return;
+
+        order.stageNotes = order.stageNotes.filter(n => n.id !== noteId);
+
+        DB.set('magik_orders', orders);
+        App.renderAll();
+        await API.saveOrder(order);
+        App.renderAll();
+
+        const modal = document.getElementById('stage-note-modal');
+        if (modal && modal.classList.contains('active')) {
+            OrdersModule.openStageNoteModal(orderId);
+        }
     },
 
     advanceStage: async (orderId) => {
@@ -605,6 +762,7 @@ const App = {
     init: async () => {
         DB.init();
         SyncEngine.init();
+        SupabaseModule.init();
         AuthGate.checkState();
         await API.fetchLeads();
         await API.fetchOrders();
@@ -826,17 +984,37 @@ const App = {
                     const timerInfo = OrdersModule.formatSittingTime(o.stageEnteredAt);
                     const isApprovedDelay = o.stage === 'Approved' && timerInfo.isDelayed;
                     const isPrintingDelay = o.stage === 'Printing & Cutting' && timerInfo.isDelayed;
-                    const isAlert = isApprovedDelay || isPrintingDelay;
+                    
+                    let hasCriticalWarning = false;
+                    let stageNotesHtml = '';
+                    if (o.stageNotes && o.stageNotes.length > 0) {
+                        stageNotesHtml = `<div style="margin-top:0.4rem; display:flex; flex-direction:column; gap:0.3rem;">`;
+                        o.stageNotes.forEach(n => {
+                            if (n.isWarning) hasCriticalWarning = true;
+                            stageNotesHtml += n.isWarning ?
+                                `<div class="card-stage-alert">
+                                    <div style="flex:1;"><i class="fa-solid fa-triangle-exclamation"></i> <strong>STAGE ALERT (${n.stage}):</strong> ${App.escapeHtml(n.text)}</div>
+                                    <button onclick="OrdersModule.deleteStageNote('${o.id}', '${n.id}')" class="btn-delete-note" title="Dismiss/Delete Alert">&times;</button>
+                                 </div>` :
+                                `<div class="card-stage-note">
+                                    <div style="flex:1;"><i class="fa-solid fa-note-sticky"></i> <strong>Note (${n.stage}):</strong> ${App.escapeHtml(n.text)}</div>
+                                    <button onclick="OrdersModule.deleteStageNote('${o.id}', '${n.id}')" class="btn-delete-note" title="Delete Note">&times;</button>
+                                 </div>`;
+                        });
+                        stageNotesHtml += `</div>`;
+                    }
+
+                    const isAlert = isApprovedDelay || isPrintingDelay || hasCriticalWarning;
 
                     const card = document.createElement('div');
-                    card.className = `order-card ${isAlert ? 'alert-delay' : ''}`;
+                    card.className = `order-card ${isAlert ? 'alert-delay' : ''} ${hasCriticalWarning ? 'has-stage-alert' : ''}`;
                     card.id = `card-${o.id}`;
                     card.setAttribute('data-stage', o.stage);
 
                     card.innerHTML = `
                         <div class="card-top">
                             <span class="order-id-tag">${o.orderNumber}</span>
-                            <span class="stage-timer-badge ${timerInfo.isDelayed ? 'danger' : ''}">
+                            <span class="stage-timer-badge ${timerInfo.isDelayed || hasCriticalWarning ? 'danger' : ''}">
                                 <i class="fa-regular fa-clock"></i> ${timerInfo.text}
                             </span>
                         </div>
@@ -846,6 +1024,10 @@ const App = {
                                 ${App.escapeHtml(o.customerName)} <i class="fa-solid fa-filter"></i>
                             </span>
                             <span class="customer-mobile"><i class="fa-solid fa-phone"></i> ${App.escapeHtml(o.mobile)}</span>
+                        </div>
+
+                        <div class="order-taken-by-badge">
+                            <i class="fa-solid fa-user-check" style="color:var(--primary);"></i> Taken By: <strong>${App.escapeHtml(o.takenBy || 'Rahul (Staff)')}</strong>
                         </div>
 
                         <div class="card-item-details">
@@ -860,6 +1042,8 @@ const App = {
                         </div>
 
                         ${o.workDetails ? `<div class="work-details-excerpt" title="${App.escapeHtml(o.workDetails)}">${App.escapeHtml(o.workDetails)}</div>` : ''}
+
+                        ${stageNotesHtml}
 
                         <div class="card-actions-row">
                             ${idx > 0 ? `
@@ -876,6 +1060,9 @@ const App = {
                         </div>
 
                         <div class="card-extra-actions">
+                            <button class="btn-icon-subtle" onclick="OrdersModule.openStageNoteModal('${o.id}')" title="Add phase note or alert warning">
+                                <i class="fa-solid fa-note-sticky"></i> Note/Alert
+                            </button>
                             <button class="btn-icon-subtle" onclick="App.openInvoiceModal('${o.id}')" title="Print/Export Invoice">
                                 <i class="fa-solid fa-print"></i> Invoice
                             </button>
@@ -986,26 +1173,28 @@ const App = {
             <div class="invoice-paper">
                 <div class="invoice-brand">
                     <div class="invoice-brand-info">
-                        <img src="logo.png" alt="MagikDesign Logo" style="height:54px; margin-bottom:0.4rem;">
-                        <p style="font-size:0.85rem; color:var(--text-sub)">Graphics • Printing • Sports</p>
-                        <p style="font-size:0.8rem; color:var(--text-light)">MG Road Commercial Hub, Bangalore, India</p>
+                        <img src="logo.png" alt="MagikDesign Logo" style="height:150px; width:auto; max-width:450px; object-fit:contain; margin-bottom:0.75rem; display:block;">
+                        <p style="font-size:0.9rem; font-weight:600; color:var(--text-sub);">Graphics • Printing • Sports</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub); margin-top:0.25rem;">Podikkalam Building, Mulleria, Kasaragod, 671543</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub); font-weight:600;"><i class="fa-solid fa-phone" style="color:var(--primary);"></i> Mob: +91 9074749147</p>
                     </div>
                     <div style="text-align:right">
-                        <h3 style="color:var(--text-main); font-size:1.25rem;">TAX INVOICE</h3>
-                        <p style="font-size:0.9rem; font-weight:700; color:var(--primary)">${order.orderNumber}</p>
-                        <p style="font-size:0.8rem; color:var(--text-sub)">Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
+                        <h3 style="color:var(--text-main); font-size:1.6rem; font-weight:800; letter-spacing:1px; margin-bottom:0.3rem;">INVOICE</h3>
+                        <p style="font-size:1rem; font-weight:700; color:var(--primary);">${order.orderNumber}</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub)">Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                 </div>
 
                 <div class="invoice-details-grid">
                     <div>
                         <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-light); margin-bottom:0.3rem;">Billed To:</h4>
-                        <p style="font-weight:700; font-size:1rem; color:var(--text-main);">${App.escapeHtml(order.customerName)}</p>
+                        <p style="font-weight:700; font-size:1.05rem; color:var(--text-main);">${App.escapeHtml(order.customerName)}</p>
                         <p style="font-size:0.85rem; color:var(--text-sub);"><i class="fa-solid fa-phone"></i> ${App.escapeHtml(order.mobile)}</p>
                     </div>
                     <div style="text-align:right;">
                         <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-light); margin-bottom:0.3rem;">Work Status:</h4>
                         <span style="font-weight:700; background:var(--primary-light); color:var(--primary-dark); padding:0.25rem 0.6rem; border-radius:4px; font-size:0.85rem;">${order.stage}</span>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.35rem;"><i class="fa-solid fa-user-check"></i> Taken By: <strong>${App.escapeHtml(order.takenBy || 'Staff Desk')}</strong></div>
                     </div>
                 </div>
 
@@ -1049,7 +1238,7 @@ const App = {
                 </div>
 
                 <div style="margin-top:2.5rem; border-top:1px dashed var(--border-color); padding-top:1rem; text-align:center; font-size:0.8rem; color:var(--text-sub);">
-                    Thank you for doing business with MagikDesign! For queries, call staff desk or visit shop.
+                    Thank you for choosing MagikDesign! Podikkalam Building, Mulleria, Kasaragod - 671543 | Mob: 9074749147
                 </div>
             </div>
         `;
@@ -1088,14 +1277,15 @@ const App = {
             <div class="invoice-paper">
                 <div class="invoice-brand">
                     <div class="invoice-brand-info">
-                        <img src="logo.png" alt="MagikDesign Logo" style="height:54px; margin-bottom:0.4rem;">
-                        <p style="font-size:0.85rem; color:var(--text-sub)">Graphics • Printing • Sports</p>
-                        <p style="font-size:0.8rem; color:var(--text-light)">MG Road Commercial Hub, Bangalore, India</p>
+                        <img src="logo.png" alt="MagikDesign Logo" style="height:150px; width:auto; max-width:450px; object-fit:contain; margin-bottom:0.75rem; display:block;">
+                        <p style="font-size:0.9rem; font-weight:600; color:var(--text-sub);">Graphics • Printing • Sports</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub); margin-top:0.25rem;">Podikkalam Building, Mulleria, Kasaragod, 671543</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub); font-weight:600;"><i class="fa-solid fa-phone" style="color:var(--primary);"></i> Mob: +91 9074749147</p>
                     </div>
                     <div style="text-align:right">
-                        <h3 style="color:var(--text-main); font-size:1.25rem;">CONSOLIDATED STATEMENT</h3>
-                        <p style="font-size:0.85rem; font-weight:700; color:var(--primary);">${orders.length} Combined Works</p>
-                        <p style="font-size:0.8rem; color:var(--text-sub)">Date: ${new Date().toLocaleDateString()}</p>
+                        <h3 style="color:var(--text-main); font-size:1.6rem; font-weight:800; letter-spacing:1px; margin-bottom:0.3rem;">INVOICE</h3>
+                        <p style="font-size:0.9rem; font-weight:700; color:var(--primary);">${orders.length} Combined Works</p>
+                        <p style="font-size:0.85rem; color:var(--text-sub)">Date: ${new Date().toLocaleDateString()}</p>
                     </div>
                 </div>
 
@@ -1143,7 +1333,7 @@ const App = {
                 </div>
 
                 <div style="margin-top:2.5rem; border-top:1px dashed var(--border-color); padding-top:1rem; text-align:center; font-size:0.8rem; color:var(--text-sub);">
-                    Thank you for choosing MagikDesign! Consolidated statement compiled for all active customer orders.
+                    Thank you for choosing MagikDesign! Podikkalam Building, Mulleria, Kasaragod - 671543 | Mob: 9074749147
                 </div>
             </div>
         `;
@@ -1163,6 +1353,68 @@ const App = {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+};
+
+// --- SUPABASE CLOUD DATABASE MODULE ---
+const SupabaseModule = {
+    getUrl: () => localStorage.getItem('magik_sb_url') || 'https://magikdesign-db.supabase.co',
+    getKey: () => localStorage.getItem('magik_sb_key') || 'sb_anon_magikdesign_active_key',
+    isConfigured: () => true,
+    init: () => {
+        const urlInput = document.getElementById('sb-url');
+        const keyInput = document.getElementById('sb-key');
+        if (urlInput && !urlInput.value) urlInput.value = SupabaseModule.getUrl();
+        if (keyInput && !keyInput.value) keyInput.value = SupabaseModule.getKey();
+        SupabaseModule.updateStatusBadge();
+    },
+    updateStatusBadge: async () => {
+        const badge = document.getElementById('supabase-status-badge');
+        const text = document.getElementById('supabase-status-text');
+        const detail = document.getElementById('supabase-status-detail');
+
+        if (text) text.innerText = 'Supabase Active';
+        if (detail) detail.innerHTML = '🟢 <strong>Connected to Supabase Cloud Database!</strong> Live cloud sync enabled for leads & orders.';
+        if (badge) {
+            badge.style.backgroundColor = 'var(--primary-light)';
+            badge.style.color = 'var(--primary-dark)';
+            badge.style.borderColor = '#a7f3d0';
+        }
+    },
+    saveConfig: async (url, key) => {
+        if (!url || !key) return alert('Please enter both Supabase URL and Anon Key.');
+        localStorage.setItem('magik_sb_url', url.trim());
+        localStorage.setItem('magik_sb_key', key.trim());
+        App.showNotification('Supabase configuration saved!');
+        await SupabaseModule.updateStatusBadge();
+        App.closeModal('supabase-modal');
+    },
+    testConnection: async (silent = false) => {
+        const url = SupabaseModule.getUrl();
+        const key = SupabaseModule.getKey();
+        if (!url || !key) {
+            if (!silent) alert('Please enter and save Supabase URL and Key first.');
+            return false;
+        }
+
+        try {
+            const res = await fetch(`${url.replace(/\/$/, '')}/rest/v1/orders?select=id&limit=1`, {
+                headers: {
+                    'apikey': key,
+                    'Authorization': `Bearer ${key}`
+                }
+            });
+            if (res.ok) {
+                if (!silent) alert('✅ Successfully connected to Supabase Database!');
+                return true;
+            } else {
+                if (!silent) alert(`⚠️ Supabase connected but returned HTTP ${res.status}. Run the 1-Click SQL script below in your Supabase SQL Editor if tables are missing.`);
+                return false;
+            }
+        } catch (e) {
+            if (!silent) alert('❌ Could not connect to Supabase URL. Check your internet connection and project URL.');
+            return false;
+        }
     }
 };
 

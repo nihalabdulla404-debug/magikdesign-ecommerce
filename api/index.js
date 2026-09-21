@@ -1,5 +1,9 @@
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
+
+const app = express();
+app.use(express.json());
 
 // On Vercel serverless environment, use /tmp or local fallback database file
 const TMP_DB_FILE = path.join('/tmp', 'database.json');
@@ -178,142 +182,234 @@ function saveDb(data) {
     } catch (e) {}
 }
 
-module.exports = (req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    const pathname = url.pathname;
-    const method = req.method;
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || 'https://proud-hermit-114900.upstash.io';
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAcDUAQIgcDE3MjczNzUxNTFmYzA0OGMxODBkOTNjMzgwZmYxZWEzNA';
 
+async function getCloudDb() {
+    try {
+        const res = await fetch(UPSTASH_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(['GET', 'magik_db'])
+        });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.result) {
+                return JSON.parse(json.result);
+            }
+        }
+    } catch (e) {
+        console.error('Cloud DB Fetch Error:', e);
+    }
+    return getDb();
+}
+
+async function saveCloudDb(data) {
+    saveDb(data);
+    try {
+        await fetch(UPSTASH_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(['SET', 'magik_db', JSON.stringify(data)])
+        });
+    } catch (e) {
+        console.error('Cloud DB Save Error:', e);
+    }
+}
+
+// CORS & Security Headers Middleware
+app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+    next();
+});
 
-    if (method === 'OPTIONS') {
-        res.status(204).end();
-        return;
+// --- STATIC FILE SERVING FOR VERCEL ---
+const STATIC_FILES = {
+    '/': { file: 'index.html', mime: 'text/html' },
+    '/index.html': { file: 'index.html', mime: 'text/html' },
+    '/styles.css': { file: 'styles.css', mime: 'text/css' },
+    '/app.js': { file: 'app.js', mime: 'application/javascript' },
+    '/logo.png': { file: 'logo.png', mime: 'image/png' }
+};
+
+app.use((req, res, next) => {
+    const route = STATIC_FILES[req.path];
+    if (route && req.method === 'GET') {
+        const pathsToTry = [
+            path.join(__dirname, '..', route.file),
+            path.join(process.cwd(), route.file),
+            path.join(__dirname, route.file)
+        ];
+        for (const filePath of pathsToTry) {
+            try {
+                if (fs.existsSync(filePath)) {
+                    res.setHeader('Content-Type', route.mime);
+                    return res.status(200).send(fs.readFileSync(filePath));
+                }
+            } catch (e) {}
+        }
+    }
+    next();
+});
+
+app.get('/api/health', async (req, res) => {
+    const db = await getCloudDb();
+    res.json({
+        status: 'online',
+        database: 'Upstash Global Shared Cloud Database (Connected)',
+        leadsCount: db.leads.length,
+        ordersCount: db.orders.length
+    });
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    const db = await getCloudDb();
+    const { username, password } = req.body || {};
+    const creds = db.auth || { username: 'admin', password: 'magik123' };
+    if (username === creds.username && password === creds.password) {
+        return res.json({ success: true, username: creds.username });
+    }
+    return res.status(401).json({ success: false, message: 'Invalid username or password' });
+});
+
+app.get('/api/leads', async (req, res) => {
+    const db = await getCloudDb();
+    res.json(db.leads);
+});
+
+app.post('/api/leads', async (req, res) => {
+    const db = await getCloudDb();
+    const newLead = {
+        id: 'lead-' + Date.now(),
+        customerName: req.body.customerName,
+        mobile: req.body.mobile,
+        enquiryText: req.body.enquiryText || '',
+        status: req.body.status || 'New',
+        createdAt: Date.now()
+    };
+    db.leads.unshift(newLead);
+    await saveCloudDb(db);
+    res.status(201).json(newLead);
+});
+
+app.put('/api/leads/:id', async (req, res) => {
+    const db = await getCloudDb();
+    const lead = db.leads.find(l => l.id === req.params.id);
+    if (lead) {
+        if (req.body.status) lead.status = req.body.status;
+        await saveCloudDb(db);
+        return res.json(lead);
+    }
+    res.status(404).json({ error: 'Lead not found' });
+});
+
+app.delete('/api/leads/:id', async (req, res) => {
+    const db = await getCloudDb();
+    db.leads = db.leads.filter(l => l.id !== req.params.id);
+    await saveCloudDb(db);
+    res.json({ success: true });
+});
+
+app.get('/api/orders', async (req, res) => {
+    const db = await getCloudDb();
+    res.json(db.orders);
+});
+
+app.post('/api/orders', async (req, res) => {
+    const db = await getCloudDb();
+
+    // If existing ID is passed, perform update instead of duplication
+    if (req.body.id) {
+        const existingIdx = db.orders.findIndex(o => o.id === req.body.id);
+        if (existingIdx !== -1) {
+            db.orders[existingIdx] = {
+                ...db.orders[existingIdx],
+                ...req.body
+            };
+            await saveCloudDb(db);
+            return res.json(db.orders[existingIdx]);
+        }
     }
 
-    let body = '';
-    req.on('data', chunk => body += chunk.toString());
-    req.on('end', () => {
-        let parsedBody = {};
-        try {
-            if (body) parsedBody = JSON.parse(body);
-        } catch (e) {}
-
-        const db = getDb();
-
-        if (pathname === '/api/health') {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(200).json({
-                status: 'online',
-                platform: 'Vercel Serverless Function',
-                leadsCount: db.leads.length,
-                ordersCount: db.orders.length
-            });
-        }
-
-        if (pathname === '/api/auth/login') {
-            const { username, password } = parsedBody;
-            const creds = db.auth || { username: 'admin', password: 'magik123' };
-            if (username === creds.username && password === creds.password) {
-                return res.status(200).json({ success: true, username: creds.username });
+    let maxNum = 1000;
+    if (Array.isArray(db.orders)) {
+        db.orders.forEach(o => {
+            if (o.orderNumber && o.orderNumber.startsWith('ORD-')) {
+                const n = parseInt(o.orderNumber.replace('ORD-', ''));
+                if (!isNaN(n) && n > maxNum) maxNum = n;
             }
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        });
+    }
+    const orderNum = 'ORD-' + (maxNum + 1);
+    const newOrder = {
+        id: req.body.id || ('ord-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4)),
+        orderNumber: orderNum,
+        customerName: req.body.customerName,
+        mobile: req.body.mobile,
+        itemType: req.body.itemType,
+        size: req.body.size || 'Standard',
+        quantity: parseInt(req.body.quantity) || 1,
+        price: parseFloat(req.body.price) || 0,
+        workDetails: req.body.workDetails || '',
+        takenBy: req.body.takenBy || 'Staff Desk',
+        stageNotes: req.body.stageNotes || [],
+        stage: req.body.stage || 'Quotation',
+        isPaid: typeof req.body.isPaid === 'boolean' ? req.body.isPaid : false,
+        stageEnteredAt: req.body.stageEnteredAt || Date.now(),
+        createdAt: req.body.createdAt || Date.now()
+    };
+    db.orders.unshift(newOrder);
+    if (req.body.convertedLeadId) {
+        const lead = db.leads.find(l => l.id === req.body.convertedLeadId);
+        if (lead) lead.status = 'Converted';
+    }
+    await saveCloudDb(db);
+    res.status(201).json(newOrder);
+});
+
+app.put('/api/orders/:id', async (req, res) => {
+    const db = await getCloudDb();
+    const idx = db.orders.findIndex(o => o.id === req.params.id);
+    if (idx !== -1) {
+        const existing = db.orders[idx];
+        const updated = {
+            ...existing,
+            ...req.body
+        };
+
+        if (req.body.stage && req.body.stage !== existing.stage) {
+            updated.stageEnteredAt = req.body.simulateDelay ? Date.now() - (25 * 3600 * 1000) : Date.now();
+        } else if (req.body.simulateDelay) {
+            updated.stageEnteredAt = Date.now() - (25 * 3600 * 1000);
         }
 
-        if (pathname === '/api/leads' && method === 'GET') {
-            return res.status(200).json(db.leads);
-        }
+        db.orders[idx] = updated;
+        await saveCloudDb(db);
+        return res.json(updated);
+    }
+    res.status(404).json({ error: 'Order not found' });
+});
 
-        if (pathname === '/api/leads' && method === 'POST') {
-            const newLead = {
-                id: 'lead-' + Date.now(),
-                customerName: parsedBody.customerName,
-                mobile: parsedBody.mobile,
-                enquiryText: parsedBody.enquiryText || '',
-                status: parsedBody.status || 'New',
-                createdAt: Date.now()
-            };
-            db.leads.unshift(newLead);
-            saveDb(db);
-            return res.status(201).json(newLead);
-        }
+app.delete('/api/orders/:id', async (req, res) => {
+    const db = await getCloudDb();
+    db.orders = db.orders.filter(o => o.id !== req.params.id);
+    await saveCloudDb(db);
+    res.json({ success: true });
+});
 
-        if (pathname.startsWith('/api/leads/') && method === 'PUT') {
-            const leadId = pathname.replace('/api/leads/', '');
-            const lead = db.leads.find(l => l.id === leadId);
-            if (lead) {
-                if (parsedBody.status) lead.status = parsedBody.status;
-                saveDb(db);
-                return res.status(200).json(lead);
-            }
-            return res.status(404).json({ error: 'Lead not found' });
-        }
-
-        if (pathname.startsWith('/api/leads/') && method === 'DELETE') {
-            const leadId = pathname.replace('/api/leads/', '');
-            db.leads = db.leads.filter(l => l.id !== leadId);
-            saveDb(db);
-            return res.status(200).json({ success: true });
-        }
-
-        if (pathname === '/api/orders' && method === 'GET') {
-            return res.status(200).json(db.orders);
-        }
-
-        if (pathname === '/api/orders' && method === 'POST') {
-            const orderNum = 'ORD-' + (1001 + db.orders.length);
-            const newOrder = {
-                id: 'ord-' + Date.now(),
-                orderNumber: orderNum,
-                customerName: parsedBody.customerName,
-                mobile: parsedBody.mobile,
-                itemType: parsedBody.itemType,
-                size: parsedBody.size || 'Standard',
-                quantity: parseInt(parsedBody.quantity) || 1,
-                price: parseFloat(parsedBody.price) || 0,
-                workDetails: parsedBody.workDetails || '',
-                stage: 'Quotation',
-                isPaid: false,
-                stageEnteredAt: Date.now(),
-                createdAt: Date.now()
-            };
-            db.orders.unshift(newOrder);
-            if (parsedBody.convertedLeadId) {
-                const lead = db.leads.find(l => l.id === parsedBody.convertedLeadId);
-                if (lead) lead.status = 'Converted';
-            }
-            saveDb(db);
-            return res.status(201).json(newOrder);
-        }
-
-        if (pathname.startsWith('/api/orders/') && method === 'PUT') {
-            const orderId = pathname.replace('/api/orders/', '');
-            const order = db.orders.find(o => o.id === orderId);
-            if (order) {
-                if (parsedBody.stage) {
-                    order.stage = parsedBody.stage;
-                    order.stageEnteredAt = Date.now();
-                }
-                if (parsedBody.simulateDelay) {
-                    order.stageEnteredAt = Date.now() - (25 * 3600 * 1000);
-                }
-                if (typeof parsedBody.isPaid === 'boolean') {
-                    order.isPaid = parsedBody.isPaid;
-                }
-                saveDb(db);
-                return res.status(200).json(order);
-            }
-            return res.status(404).json({ error: 'Order not found' });
-        }
-
-        if (pathname.startsWith('/api/orders/') && method === 'DELETE') {
-            const orderId = pathname.replace('/api/orders/', '');
-            db.orders = db.orders.filter(o => o.id !== orderId);
-            saveDb(db);
-            return res.status(200).json({ success: true });
-        }
-
-        return res.status(404).json({ error: 'Endpoint not found' });
-    });
-};
+module.exports = app;
